@@ -27,7 +27,8 @@
   const DEFAULTS = {
     neg: { support: 'film', ink: 'oliva', dr: 1.15, autoDr: true, contrast: 0, gamma: 1, black: 0, white: 100, mix: 'neutro' },
     proc: { chem: 'clasica', exposure: 0, paper: 'blanco', oxidation: 1, toner: 'ninguno', tonerAmount: 0.65, printDmax: 1.32, texture: 0.35 },
-    out: { size: 'a4', w: 210, h: 297, margin: 6, fit: 'cover', dpi: 360, mirror: true, marks: true }
+    out: { size: 'a4', w: 210, h: 297, margin: 6, fit: 'cover', dpi: 360, mirror: true, marks: true },
+    cal: { steps: 21 }
   };
 
   const state = JSON.parse(JSON.stringify(DEFAULTS));
@@ -47,9 +48,9 @@
 
   function save() {
     try {
-      localStorage.setItem(KEY, JSON.stringify({ neg: state.neg, proc: state.proc, out: state.out }));
+      localStorage.setItem(KEY, JSON.stringify({ neg: state.neg, proc: state.proc, out: state.out, cal: state.cal }));
       localStorage.setItem(KEYP, JSON.stringify(profiles));
-    } catch { /* modo privado: seguimos sin guardar */ }
+    } catch (_e) { /* modo privado: seguimos sin guardar */ }
   }
   function restore() {
     try {
@@ -59,10 +60,11 @@
         if (o.neg) Object.assign(state.neg, o.neg);
         if (o.proc) Object.assign(state.proc, o.proc);
         if (o.out) Object.assign(state.out, o.out);
+        if (o.cal) Object.assign(state.cal, o.cal);
       }
       const pr = localStorage.getItem(KEYP);
       if (pr) profiles = JSON.parse(pr);
-    } catch { /* datos corruptos: arrancamos limpio */ }
+    } catch (_e) { /* datos corruptos: arrancamos limpio */ }
   }
 
   /* ------------------------------------------------------------------ motor */
@@ -92,10 +94,20 @@
   /* --------------------------------------------------------------- dibujado */
   function groundBox() {
     const g = $('#ground');
+    const paper = $('#paper');
     const pad = 26;
+    /* El suelo es un grid: si el papel ya está grande, agranda el suelo y la
+       medida se realimenta (el papel nunca encoge). Se colapsa un instante
+       para medir el hueco de verdad. */
+    const pw = paper.style.width, ph = paper.style.height;
+    paper.style.width = '0px';
+    paper.style.height = '0px';
+    const w = g.clientWidth, h = g.clientHeight;
+    paper.style.width = pw;
+    paper.style.height = ph;
     return {
-      w: Math.max(80, g.clientWidth - pad * 2),
-      h: Math.max(80, g.clientHeight - pad * 2)
+      w: Math.max(80, w - pad * 2),
+      h: Math.max(80, h - pad * 2)
     };
   }
 
@@ -548,10 +560,16 @@
   let calPhoto = null;
   let calQuad = null;
 
+  function calSteps() {
+    const n = state.cal && state.cal.steps;
+    return n === 51 || n === 101 ? n : 21;
+  }
+
   function drawCalSheetPreview() {
     const c = $('#cal-sheet');
     P.sheets.drawCalSheet(c, {
       dpi: 100,
+      steps: calSteps(),
       inkRGB: E.INK[state.neg.ink].rgb
     });
     c.style.width = '100%';
@@ -561,7 +579,7 @@
 
   function calSheetFull() {
     const c = document.createElement('canvas');
-    P.sheets.drawCalSheet(c, { dpi: 300, inkRGB: E.INK[state.neg.ink].rgb });
+    P.sheets.drawCalSheet(c, { dpi: 300, steps: calSteps(), inkRGB: E.INK[state.neg.ink].rgb });
     return c;
   }
 
@@ -607,9 +625,10 @@
     g.closePath();
     g.stroke();
     g.setLineDash([]);
-    // divisiones de los 21 pasos
-    for (let i = 0; i <= 21; i++) {
-      const u = i / 21;
+    // divisiones de los pasos
+    const ns = calSteps();
+    for (let i = 0; i <= ns; i++) {
+      const u = i / ns;
       const top = [calQuad[0][0] + (calQuad[1][0] - calQuad[0][0]) * u, calQuad[0][1] + (calQuad[1][1] - calQuad[0][1]) * u];
       const bot = [calQuad[3][0] + (calQuad[2][0] - calQuad[3][0]) * u, calQuad[3][1] + (calQuad[2][1] - calQuad[3][1]) * u];
       g.strokeStyle = 'rgba(255,255,255,0.28)';
@@ -633,10 +652,21 @@
 
   function analyzeCal() {
     const c = $('#cal-photo');
-    if (!c || !calQuad) return;
-    const g = c.getContext('2d');
-    const data = g.getImageData(0, 0, c.width, c.height);
-    const samples = P.calib.sampleStrip(data, calQuad, 21);
+    if (!c || !calQuad || !calPhoto) return;
+    /* Se mide sobre la foto original, no sobre la copia que se ve en pantalla:
+       con 101 pasos la copia reducida no tiene píxeles para tanto parche.
+       El tope de 2400 px evita cargar 12 Mpx en memoria para nada. */
+    const s = Math.min(1, 2400 / calPhoto.width);
+    const k = (calPhoto.width / c.width) * s;
+    const off = document.createElement('canvas');
+    off.width = Math.round(calPhoto.width * s);
+    off.height = Math.round(calPhoto.height * s);
+    const og = off.getContext('2d', { willReadFrequently: true });
+    og.drawImage(calPhoto, 0, 0, off.width, off.height);
+    const data = og.getImageData(0, 0, off.width, off.height);
+    const n = calSteps();
+    const quad = calQuad.map(([x, y]) => [x * k, y * k]);
+    const samples = P.calib.sampleStrip(data, quad, n);
     const an = P.calib.analyze(samples);
     calAnalysis = an;
     $('#cal-result').hidden = false;
@@ -644,7 +674,7 @@
     const st = $('#cal-stats');
     st.textContent = '';
     [
-      ['pasos leídos', '21 de 21'],
+      ['pasos leídos', n + ' de ' + n],
       ['mesetas', String(an.plateau)],
       ['inversiones', String(an.inversions)],
       ['ruido', an.noise.toFixed(0)]
@@ -654,7 +684,7 @@
     const dg = $('#cal-diagnosis');
     dg.textContent = an.warnings.length
       ? an.warnings.map((w) => w.text).join(' ')
-      : 'La tira se lee bien: 21 pasos monótonos, sin mesetas. Guarda el perfil y úsalo con todas tus imágenes.';
+      : 'La tira se lee bien: ' + n + ' pasos monótonos, sin mesetas. Guarda el perfil y úsalo con todas tus imágenes.';
     $('#cal-name').value = $('#cal-name').value || ('Perfil ' + new Date().toLocaleDateString('es-ES'));
   }
 
@@ -864,6 +894,18 @@
       printCanvas(c, 210, 297);
     });
     $('#btn-cal-save').addEventListener('click', () => download(calSheetFull(), 'prusia-carta-calibracion.png'));
+    const calStepsSel = $('#in-calsteps');
+    calStepsSel.value = String(calSteps());
+    calStepsSel.addEventListener('change', () => {
+      state.cal = { steps: Number(calStepsSel.value) };
+      save();
+      drawCalSheetPreview();
+      if (calPhoto) {
+        $('#cal-result').hidden = true;
+        calAnalysis = null;
+        U.toast('Tira de ' + calSteps() + ' pasos: vuelve a analizar la foto');
+      }
+    });
     $('#btn-cal-photo').addEventListener('click', () => $('#cal-file').click());
     $('#cal-file').addEventListener('change', (e) => {
       const f = e.target.files && e.target.files[0];
@@ -936,6 +978,11 @@
 
     window.addEventListener('resize', () => {
       if (state.view === 'revelar') drawStage();
+      else if (state.view === 'calibrar' && calAnalysis) {
+        P.sheets.drawCurve($('#cal-curve'), calAnalysis.xs, calAnalysis.ys, {
+          residual: 'residuo ' + (calAnalysis.noise / 255).toFixed(3)
+        });
+      }
     });
 
     // zoom con rueda sobre el escenario
@@ -967,7 +1014,10 @@
     state: state,
     engine: () => engine,
     negative: () => makeNegative(),
-    profiles: () => profiles
+    profiles: () => profiles,
+    /* repintado síncrono: la app va por rAF y las pestañas en segundo plano
+       no lo reciben, así que las pruebas necesitan forzarlo */
+    redraw: () => { buildEngine(); drawStage(); renderReadouts(); syncHints(); }
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

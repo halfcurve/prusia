@@ -30,7 +30,7 @@
     <span class="file-name" id="file-name" title="Ninguna imagen cargada">sin imagen</span>
     <button class="btn btn-quiet" id="btn-sample" title="Cargar un fotograma de ejemplo">Ejemplo</button>
     <button class="btn btn-primary" id="btn-open">Abrir imagen</button>
-    <input type="file" id="file-input" accept="image/*" multiple hidden>
+    <input type="file" id="file-input" accept="image/*" multiple hidden aria-label="Abrir imágenes">
   </div>
 </header>
 
@@ -99,12 +99,21 @@
           <div class="step-num">1</div>
           <div class="step-body">
             <h3>Imprime la carta de calibración</h3>
-            <p>Una tira de 21 pasos más una comparativa de tintas. Imprímela tal cual, sin escalar, sobre el mismo film que uses siempre.</p>
+            <p>Una tira de pasos más una comparativa de tintas. Imprímela tal cual, sin escalar, sobre el mismo film que uses siempre.</p>
+            <div class="ctl cal-steps">
+              <div class="ctl-head"><label class="ctl-label" for="in-calsteps">Pasos de la tira</label></div>
+              <select class="select" id="in-calsteps">
+                <option value="21">21 · se lee a ojo</option>
+                <option value="51">51 · foto con buena luz</option>
+                <option value="101">101 · sólo escaneada</option>
+              </select>
+              <p class="ctl-hint">Con 21 sobra para empezar. Las tablas de 101-256 pasos son las de Easy Digital Negatives: más finas, y piden que la tira llene el encuadre o un escáner.</p>
+            </div>
             <div class="step-actions">
               <button class="btn btn-primary" id="btn-cal-sheet">Abrir la carta</button>
               <button class="btn btn-quiet" id="btn-cal-save">Guardar PNG</button>
             </div>
-            <p class="step-note">Expón la tira sobre una hoja sensibilizada hasta que el último paso salga azul pleno. Anota el tiempo: es tu <em>tiempo base</em>.</p>
+            <p class="step-note">Expón la tira sobre una hoja sensibilizada hasta que el último paso salga azul pleno. Anota el tiempo: es tu <em>tiempo base</em>. La tira también compara cinco tintas: la apariencia no dice cuánto UV bloquea cada una, la copia lo dice.</p>
             <div class="cal-preview"><canvas id="cal-sheet" width="10" height="10"></canvas></div>
           </div>
         </li>
@@ -116,7 +125,7 @@
             <p>Luz de día, sin sombras duras, la tira llenando el encuadre. Vale foto del móvil: Prusia mide el canal rojo, que es donde el azul de Prusia absorbe.</p>
             <div class="step-actions">
               <button class="btn btn-primary" id="btn-cal-photo">Subir foto de la tira</button>
-              <input type="file" id="cal-file" accept="image/*" hidden>
+              <input type="file" id="cal-file" accept="image/*" hidden aria-label="Foto de la tira de calibración">
               <button class="btn btn-quiet" id="btn-cal-manual">Meter valores a mano</button>
             </div>
             <div class="cal-align" id="cal-align" hidden>
@@ -176,10 +185,11 @@
           <dl class="recipe-list" id="recipe-list"></dl>
           <h3 class="mt">Orden de trabajo</h3>
           <ol class="recipe-steps">
-            <li>Imprime el negativo con los ajustes de arriba, sobre film. Deja secar 5 minutos antes de tocarlo.</li>
-            <li>Sensibiliza el papel, sécalo en oscuridad y coloca el negativo con la tinta <strong>contra</strong> el papel.</li>
-            <li>Expón (sol directo ~3-8 min; lámpara UV 365 nm ~2-4 min) y revela en agua corriente 5 minutos.</li>
-            <li>El azul sigue subiendo durante 24 h. Para verlo ya: una gota de agua oxigenada en el último baño.</li>
+            <li>Imprime el negativo sobre film. Deja secar una hora antes de tocarlo: la tinta fresca se corre.</li>
+            <li>Sensibiliza el papel en penumbra y sécalo a oscuras. Mezcla A+B justo antes: aguanta 2-4 h.</li>
+            <li>Coloca el negativo con la tinta <strong>contra</strong> el papel y expón. Clásica 3-8 min al sol (2-4 min lámpara UV 365); kit Jacquard 10-20 min. Pasarse es mejor que quedarse corto: si sale velado baja el tiempo a la mitad, si sale corto duplícalo.</li>
+            <li>Revela en agua corriente 5 min hasta que salga limpia. Una gota de agua oxigenada lo azula al instante; si no, sube solo en 24 h.</li>
+            <li>Para virar: blanquea en carbonato sódico (1-2 cucharaditas por litro, menos de 5 min) hasta amarillo dorado, aclara y baña en ácido tánico al 2 % o té de 2 a 24 h.</li>
           </ol>
         </div>
       </div>

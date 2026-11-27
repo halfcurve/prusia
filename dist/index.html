@@ -169,7 +169,7 @@ body {
 .group { padding: 14px 0 4px; border-top: 1px solid var(--line-soft); }
 .group:first-child { border-top: 0; padding-top: 10px; }
 .group-title {
-  font-size: 10.5px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase;
   color: var(--muted-2); margin: 0 0 10px;
 }
 
@@ -263,7 +263,8 @@ body {
 .stage-meta { margin-left: auto; font: 500 11px/1 var(--mono); color: var(--muted-2); }
 
 .stage-ground {
-  flex: 1; min-height: 0; display: grid; place-items: center; position: relative;
+  flex: 1; min-width: 0; min-height: 0; display: grid; place-items: center; position: relative;
+  overflow: hidden;
   padding: 26px;
   background:
     radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.028), transparent 62%),
@@ -275,7 +276,6 @@ body {
   position: relative; max-width: 100%; max-height: 100%;
   background: var(--paper);
   box-shadow: var(--shadow-paper);
-  transition: background 0.25s var(--ease);
   display: grid; place-items: center;
   transition: background 0.25s var(--ease);
 }
@@ -291,7 +291,7 @@ body {
 .drop-title { margin: 0 0 6px; font-size: 14px; color: var(--ink-2); }
 .drop-sub { margin: 0; font-size: 11.5px; color: var(--muted-2); }
 kbd {
-  font: 500 10.5px/1 var(--mono); padding: 2px 5px; border-radius: 4px;
+  font: 500 11px/1 var(--mono); padding: 2px 5px; border-radius: 4px;
   background: var(--panel-2); border: 1px solid var(--line); color: var(--ink-2); margin: 0 1px;
 }
 
@@ -303,7 +303,7 @@ kbd {
 .readouts { display: flex; gap: 16px; flex-wrap: wrap; min-width: 0; }
 .readout { display: flex; align-items: baseline; gap: 6px; }
 .readout dt, .readout span.ro-k {
-  font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-2);
+  font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-2);
 }
 .readout b { font: 500 11.5px/1 var(--mono); color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .warnings { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
@@ -321,7 +321,7 @@ kbd {
 .doc { max-width: 820px; margin: 0 auto; padding: 40px 32px 80px; }
 .doc-2col { max-width: 1180px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; }
 .doc-head { margin-bottom: 34px; }
-.eyebrow { margin: 0 0 10px; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+.eyebrow { margin: 0 0 10px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
 .doc-head h2 { margin: 0 0 12px; font-size: 27px; line-height: 1.22; letter-spacing: -0.022em; font-weight: 500; max-width: 22ch; }
 .lede { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--ink-2); max-width: 62ch; }
 
@@ -442,7 +442,7 @@ kbd {
     <span class="file-name" id="file-name" title="Ninguna imagen cargada">sin imagen</span>
     <button class="btn btn-quiet" id="btn-sample" title="Cargar un fotograma de ejemplo">Ejemplo</button>
     <button class="btn btn-primary" id="btn-open">Abrir imagen</button>
-    <input type="file" id="file-input" accept="image/*" multiple hidden>
+    <input type="file" id="file-input" accept="image/*" multiple hidden aria-label="Abrir imágenes">
   </div>
 </header>
 
@@ -511,12 +511,21 @@ kbd {
           <div class="step-num">1</div>
           <div class="step-body">
             <h3>Imprime la carta de calibración</h3>
-            <p>Una tira de 21 pasos más una comparativa de tintas. Imprímela tal cual, sin escalar, sobre el mismo film que uses siempre.</p>
+            <p>Una tira de pasos más una comparativa de tintas. Imprímela tal cual, sin escalar, sobre el mismo film que uses siempre.</p>
+            <div class="ctl cal-steps">
+              <div class="ctl-head"><label class="ctl-label" for="in-calsteps">Pasos de la tira</label></div>
+              <select class="select" id="in-calsteps">
+                <option value="21">21 · se lee a ojo</option>
+                <option value="51">51 · foto con buena luz</option>
+                <option value="101">101 · sólo escaneada</option>
+              </select>
+              <p class="ctl-hint">Con 21 sobra para empezar. Las tablas de 101-256 pasos son las de Easy Digital Negatives: más finas, y piden que la tira llene el encuadre o un escáner.</p>
+            </div>
             <div class="step-actions">
               <button class="btn btn-primary" id="btn-cal-sheet">Abrir la carta</button>
               <button class="btn btn-quiet" id="btn-cal-save">Guardar PNG</button>
             </div>
-            <p class="step-note">Expón la tira sobre una hoja sensibilizada hasta que el último paso salga azul pleno. Anota el tiempo: es tu <em>tiempo base</em>.</p>
+            <p class="step-note">Expón la tira sobre una hoja sensibilizada hasta que el último paso salga azul pleno. Anota el tiempo: es tu <em>tiempo base</em>. La tira también compara cinco tintas: la apariencia no dice cuánto UV bloquea cada una, la copia lo dice.</p>
             <div class="cal-preview"><canvas id="cal-sheet" width="10" height="10"></canvas></div>
           </div>
         </li>
@@ -528,7 +537,7 @@ kbd {
             <p>Luz de día, sin sombras duras, la tira llenando el encuadre. Vale foto del móvil: Prusia mide el canal rojo, que es donde el azul de Prusia absorbe.</p>
             <div class="step-actions">
               <button class="btn btn-primary" id="btn-cal-photo">Subir foto de la tira</button>
-              <input type="file" id="cal-file" accept="image/*" hidden>
+              <input type="file" id="cal-file" accept="image/*" hidden aria-label="Foto de la tira de calibración">
               <button class="btn btn-quiet" id="btn-cal-manual">Meter valores a mano</button>
             </div>
             <div class="cal-align" id="cal-align" hidden>
@@ -588,10 +597,11 @@ kbd {
           <dl class="recipe-list" id="recipe-list"></dl>
           <h3 class="mt">Orden de trabajo</h3>
           <ol class="recipe-steps">
-            <li>Imprime el negativo con los ajustes de arriba, sobre film. Deja secar 5 minutos antes de tocarlo.</li>
-            <li>Sensibiliza el papel, sécalo en oscuridad y coloca el negativo con la tinta <strong>contra</strong> el papel.</li>
-            <li>Expón (sol directo ~3-8 min; lámpara UV 365 nm ~2-4 min) y revela en agua corriente 5 minutos.</li>
-            <li>El azul sigue subiendo durante 24 h. Para verlo ya: una gota de agua oxigenada en el último baño.</li>
+            <li>Imprime el negativo sobre film. Deja secar una hora antes de tocarlo: la tinta fresca se corre.</li>
+            <li>Sensibiliza el papel en penumbra y sécalo a oscuras. Mezcla A+B justo antes: aguanta 2-4 h.</li>
+            <li>Coloca el negativo con la tinta <strong>contra</strong> el papel y expón. Clásica 3-8 min al sol (2-4 min lámpara UV 365); kit Jacquard 10-20 min. Pasarse es mejor que quedarse corto: si sale velado baja el tiempo a la mitad, si sale corto duplícalo.</li>
+            <li>Revela en agua corriente 5 min hasta que salga limpia. Una gota de agua oxigenada lo azula al instante; si no, sube solo en 24 h.</li>
+            <li>Para virar: blanquea en carbonato sódico (1-2 cucharaditas por litro, menos de 5 min) hasta amarillo dorado, aclara y baña en ácido tánico al 2 % o té de 2 a 24 h.</li>
           </ol>
         </div>
       </div>
@@ -1108,7 +1118,12 @@ kbd {
     clasica: {
       name: 'Clásica (Herschel)', short: 'Clásica',
       range: 1.15, k: 1.25, toe: 0.06, shoulder: 0.12, printDmax: 1.32,
-      note: 'Citrato férrico amónico + ferricianuro potásico 1:1. Pierde casi la mitad de la escala tonal en el lavado.'
+      note: 'Citrato férrico amónico 20 % + ferricianuro potásico 8 %, 1:1. Pierde casi la mitad de la escala tonal en el lavado.'
+    },
+    jacquard: {
+      name: 'Kit Jacquard (A+B)', short: 'Jacquard',
+      range: 1.05, k: 1.28, toe: 0.06, shoulder: 0.13, printDmax: 1.12,
+      note: 'Las dos partes del kit: A 40 g/400 ml + B 100 g/400 ml, 1:1 → 5 % ferricianuro y 12,5 % citrato, un 62 % de la clásica. La mezcla aguanta 2-4 h: se hace justo antes.'
     },
     ware: {
       name: 'Nueva cianotipia (Ware)', short: 'Ware',
@@ -1122,6 +1137,9 @@ kbd {
     }
   };
 
+  /* minutos de exposición al sol por química, con un negativo bien denso */
+  const EXPOSURE_MIN = { clasica: [3, 8], jacquard: [10, 20], ware: [2, 6], simple: [2, 5] };
+
   const SOURCE = {
     film: { name: 'Film de inyección (transparencia)', dr: 2.6, note: 'El soporte que mejor bloquea UV con tintas de colorante.' },
     papel: { name: 'Papel normal', dr: 1.9, note: 'Sirve, pero filtra menos UV: negativos más planos.' },
@@ -1132,7 +1150,7 @@ kbd {
     mono: mono, invertMonotone: invertMonotone,
     yToL: yToL, lToY: lToY,
     toneCurve: toneCurve, responseCurve: responseCurve, responseFromSamples: responseFromSamples,
-    CHEM: CHEM, SOURCE: SOURCE
+    CHEM: CHEM, SOURCE: SOURCE, EXPOSURE_MIN: EXPOSURE_MIN
   };
 })(typeof window !== 'undefined' ? (window.P = window.P || {}) : (module.exports = {}));
 
@@ -1168,11 +1186,11 @@ kbd {
      en tintas de colorante: el amarillo absorbe 400-480 nm, justo la cola
      útil del cianotipo. */
   const INK = {
-    oliva:     { name: 'Oliva UV', rgb: [64, 128, 0], gain: 1.0, mode: 'Color', note: 'Amarillo dominante (Y100 M50 C75). El que más UV bloquea.' },
-    amarillo:  { name: 'Amarillo', rgb: [255, 216, 0], gain: 0.9, mode: 'Color', note: 'Amarillo puro: bloquea bien el azul-violeta con menos tinta.' },
-    compuesto: { name: 'Compuesto neutro', rgb: [22, 22, 22], gain: 0.85, mode: 'Color', note: 'Negro de los cuatro canales. Cómodo, algo menos denso.' },
-    negro:     { name: 'Negro puro (K)', rgb: [0, 0, 0], gain: 0.55, mode: 'Escala de grises', note: 'Solo tinta K. En dye bloquea poco UV: negativo plano.' },
-    magenta:   { name: 'Magenta', rgb: [200, 0, 120], gain: 0.5, mode: 'Color', note: 'Bloquea el verde, no el UV: el peor para cianotipia.' }
+    oliva:     { name: 'Oliva UV', rgb: [64, 128, 0], gain: 1.0, mode: 'Color', note: 'Amarillo dominante (Y100 M50 C75). Con tintas Epson el amarillo es el que más UV absorbe después del negro de foto.' },
+    amarillo:  { name: 'Amarillo', rgb: [255, 216, 0], gain: 0.95, mode: 'Color', note: 'Amarillo puro: absorbe 400-480 nm, la cola que el cianotipo todavía ve, y con menos tinta encima.' },
+    compuesto: { name: 'Compuesto neutro', rgb: [22, 22, 22], gain: 0.85, mode: 'Color', note: 'Los cuatro canales a la vez. Cómodo y sin sorpresas de color, algo menos denso en UV que el amarillo.' },
+    negro:     { name: 'Negro puro (K)', rgb: [0, 0, 0], gain: 0.55, mode: 'Escala de grises', note: 'Solo la tinta K. En tintas de colorante (esta impresora) está optimizada para el visible y se queda corta en UV: negativo plano.' },
+    magenta:   { name: 'Magenta', rgb: [200, 0, 120], gain: 0.5, mode: 'Color', note: 'Absorbe el verde y deja pasar el azul, o sea el UV: en teoría la peor. EDN mide lo contrario con otros juegos (57 tonos con un negativo rojizo frente a 23 en negro). No hay regla: hay pruebas.' }
   };
 
   /* ---------- construcción de la cadena ---------- */
@@ -1423,22 +1441,44 @@ kbd {
     // imponer monotonía creciente con PAVA
     const ys = pava(ysRaw);
 
-    // mesetas: diferencias nulas sobre un tramo largo = sobreexposición
-    // mesetas interiores: los extremos saturados (tinta plena, film limpio)
-    // son normales y no indican sobreexposición
-    let plateau = 0;
-    for (let i = 3; i < n - 2; i++) if (ysRaw[i] - ysRaw[i - 1] < 0.004) plateau++;
-    const inversions = ysRaw.reduce((acc, v, i) => acc + (i > 0 && v < ysRaw[i - 1] - 0.01 ? 1 : 0), 0);
-
-    // ruido por parche
+    // ruido por parche (antes de fijar umbrales: con tiras finas manda él)
     const noise = samples.reduce((a, s) => a + s.spread, 0) / n;
+
+    // mesetas: diferencias nulas sobre un tramo largo = sobreexposición.
+    // Los extremos saturados (tinta plena, film limpio) son normales y no
+    // cuentan. El umbral escala con los pasos: con 101, dos parches seguidos
+    // distan cinco veces menos que con 21.
+    const edge = Math.max(2, Math.round(n * 0.06));
+    const inner = [];
+    for (let i = edge; i < n - edge; i++) inner.push(ysRaw[i] - ysRaw[i - 1]);
+    inner.sort((a, b) => a - b);
+    const best = inner.length ? inner[inner.length - 1] : 0;
+    // un paso es meseta si avanza menos del 2 % de lo que avanza el paso más
+    // vivo de la tira: el umbral vale igual para 21 pasos que para 101.
+    const plateauEps = Math.max(1e-4, best * 0.02);
+    let plateau = 0, run = 0;
+    for (let i = edge; i < n - edge; i++) {
+      if (ysRaw[i] - ysRaw[i - 1] < plateauEps) { run++; if (run > plateau) plateau = run; } else run = 0;
+    }
+    // una inversión menor que el propio ruido no es una inversión
+    const invThresh = Math.max(0.012, noise / 255);
+    const inversions = ysRaw.reduce((acc, v, i) => acc + (i > 0 && v < ysRaw[i - 1] - invThresh ? 1 : 0), 0);
 
     // contraste: pendiente media de la zona central
     const mid = ys[Math.round(n / 2)] - ys[Math.round(n / 4)];
     const warnings = [];
     if (ys[0] > 0.08) warnings.push({ level: 'warn', text: 'El paso más denso no llega a papel blanco: falta exposición o densidad de tinta.' });
     if (ys[n - 1] < 0.9) warnings.push({ level: 'warn', text: 'El paso transparente no llega a azul pleno: sube el tiempo de exposición.' });
-    if (plateau >= 4) warnings.push({ level: 'bad', text: 'Hay una meseta de ' + plateau + ' pasos: la copia está sobreexpuesta. Baja el tiempo y repite.' });
+    // si lo que separa un parche del siguiente es menos que el ruido de la
+    // propia foto, la tira es ilegible por fina, no por sobreexpuesta
+    const unreadable = best < Math.max(0.004, noise / 255 * 0.8);
+    if (unreadable) {
+      warnings.push({ level: 'warn', text: n > 21
+        ? 'No distingo un paso del siguiente: ni la mejor foto da para ' + n + ' parches. Escanéala o baja a 21 pasos.'
+        : 'No distingo un paso del siguiente: repite la foto con luz plana y la tira llenando el encuadre.' });
+    } else if (plateau >= Math.max(4, Math.round((n - 2 * edge) * 0.5))) {
+      warnings.push({ level: 'bad', text: 'La tira está plana en ' + plateau + ' pasos: la copia está sobreexpuesta. Baja el tiempo y repite.' });
+    }
     if (inversions > 1) warnings.push({ level: 'bad', text: 'La densidad no baja de forma monótona: la foto tiene reflejos o el film está manchado.' });
     if (noise > 9) warnings.push({ level: 'warn', text: 'Los parches están sucios (ruido ' + noise.toFixed(0) + '): repite la foto con luz plana.' });
     if (rDark > 250) warnings.push({ level: 'bad', text: 'La copia sale casi blanca: algo falló en la exposición.' });
@@ -1490,9 +1530,11 @@ kbd {
 (function (P) {
   'use strict';
   /* ---------- carta de calibración ---------- */
-  /* Un A4 con la tira de 21 pasos y una comparativa de tintas. */
+  /* Un A4 con la tira de pasos y una comparativa de tintas.
+     opt.steps: 21 (a ojo), 51 o 101 (escaneada, como las tablas de EDN). */
   function drawCalSheet(canvas, opt) {
     const dpi = (opt && opt.dpi) || 300;
+    const N = (opt && opt.steps) || 21;
     const mm = (v) => (v / 25.4) * dpi;
     const W = Math.round(mm(210)), H = Math.round(mm(297));
     canvas.width = W; canvas.height = H;
@@ -1535,13 +1577,13 @@ kbd {
       fx += w + mm(6);
     }
 
-    // tira de 21 pasos
+    // tira de pasos
     const stripY = mm(62);
     const stripH = mm(26);
     const stripW = W - M * 2;
-    const stepW = stripW / 21;
-    for (let i = 0; i < 21; i++) {
-      g.fillStyle = inkPx(i / 20);
+    const stepW = stripW / N;
+    for (let i = 0; i < N; i++) {
+      g.fillStyle = inkPx(i / (N - 1));
       g.fillRect(M + i * stepW, stripY, Math.ceil(stepW) + 0.5, stripH);
     }
     g.strokeStyle = '#1f1f1f';
@@ -1550,7 +1592,8 @@ kbd {
     g.font = `500 ${mm(2.3)}px ui-monospace, Menlo, monospace`;
     g.fillStyle = '#333';
     g.textAlign = 'center';
-    for (let i = 0; i < 21; i++) {
+    const every = N > 51 ? 10 : 1;
+    for (let i = 0; i < N; i += every) {
       g.fillText(String(i), M + (i + 0.5) * stepW, stripY + stripH + mm(4.5));
     }
     g.textAlign = 'left';
@@ -1659,7 +1702,8 @@ kbd {
     for (let i = 0; i <= 120; i++) {
       const x = i / 120;
       const y = sp.at(x);
-      i ? g.lineTo(X(x), Y(y)) : g.moveTo(X(x), Y(y));
+      if (i === 0) g.moveTo(X(x), Y(y));
+      else g.lineTo(X(x), Y(y));
     }
     g.strokeStyle = '#4e8cc9';
     g.lineWidth = 2;
@@ -2165,7 +2209,8 @@ kbd {
   const DEFAULTS = {
     neg: { support: 'film', ink: 'oliva', dr: 1.15, autoDr: true, contrast: 0, gamma: 1, black: 0, white: 100, mix: 'neutro' },
     proc: { chem: 'clasica', exposure: 0, paper: 'blanco', oxidation: 1, toner: 'ninguno', tonerAmount: 0.65, printDmax: 1.32, texture: 0.35 },
-    out: { size: 'a4', w: 210, h: 297, margin: 6, fit: 'cover', dpi: 360, mirror: true, marks: true }
+    out: { size: 'a4', w: 210, h: 297, margin: 6, fit: 'cover', dpi: 360, mirror: true, marks: true },
+    cal: { steps: 21 }
   };
 
   const state = JSON.parse(JSON.stringify(DEFAULTS));
@@ -2185,9 +2230,9 @@ kbd {
 
   function save() {
     try {
-      localStorage.setItem(KEY, JSON.stringify({ neg: state.neg, proc: state.proc, out: state.out }));
+      localStorage.setItem(KEY, JSON.stringify({ neg: state.neg, proc: state.proc, out: state.out, cal: state.cal }));
       localStorage.setItem(KEYP, JSON.stringify(profiles));
-    } catch { /* modo privado: seguimos sin guardar */ }
+    } catch (_e) { /* modo privado: seguimos sin guardar */ }
   }
   function restore() {
     try {
@@ -2197,10 +2242,11 @@ kbd {
         if (o.neg) Object.assign(state.neg, o.neg);
         if (o.proc) Object.assign(state.proc, o.proc);
         if (o.out) Object.assign(state.out, o.out);
+        if (o.cal) Object.assign(state.cal, o.cal);
       }
       const pr = localStorage.getItem(KEYP);
       if (pr) profiles = JSON.parse(pr);
-    } catch { /* datos corruptos: arrancamos limpio */ }
+    } catch (_e) { /* datos corruptos: arrancamos limpio */ }
   }
 
   /* ------------------------------------------------------------------ motor */
@@ -2230,10 +2276,20 @@ kbd {
   /* --------------------------------------------------------------- dibujado */
   function groundBox() {
     const g = $('#ground');
+    const paper = $('#paper');
     const pad = 26;
+    /* El suelo es un grid: si el papel ya está grande, agranda el suelo y la
+       medida se realimenta (el papel nunca encoge). Se colapsa un instante
+       para medir el hueco de verdad. */
+    const pw = paper.style.width, ph = paper.style.height;
+    paper.style.width = '0px';
+    paper.style.height = '0px';
+    const w = g.clientWidth, h = g.clientHeight;
+    paper.style.width = pw;
+    paper.style.height = ph;
     return {
-      w: Math.max(80, g.clientWidth - pad * 2),
-      h: Math.max(80, g.clientHeight - pad * 2)
+      w: Math.max(80, w - pad * 2),
+      h: Math.max(80, h - pad * 2)
     };
   }
 
@@ -2686,10 +2742,16 @@ kbd {
   let calPhoto = null;
   let calQuad = null;
 
+  function calSteps() {
+    const n = state.cal && state.cal.steps;
+    return n === 51 || n === 101 ? n : 21;
+  }
+
   function drawCalSheetPreview() {
     const c = $('#cal-sheet');
     P.sheets.drawCalSheet(c, {
       dpi: 100,
+      steps: calSteps(),
       inkRGB: E.INK[state.neg.ink].rgb
     });
     c.style.width = '100%';
@@ -2699,7 +2761,7 @@ kbd {
 
   function calSheetFull() {
     const c = document.createElement('canvas');
-    P.sheets.drawCalSheet(c, { dpi: 300, inkRGB: E.INK[state.neg.ink].rgb });
+    P.sheets.drawCalSheet(c, { dpi: 300, steps: calSteps(), inkRGB: E.INK[state.neg.ink].rgb });
     return c;
   }
 
@@ -2745,9 +2807,10 @@ kbd {
     g.closePath();
     g.stroke();
     g.setLineDash([]);
-    // divisiones de los 21 pasos
-    for (let i = 0; i <= 21; i++) {
-      const u = i / 21;
+    // divisiones de los pasos
+    const ns = calSteps();
+    for (let i = 0; i <= ns; i++) {
+      const u = i / ns;
       const top = [calQuad[0][0] + (calQuad[1][0] - calQuad[0][0]) * u, calQuad[0][1] + (calQuad[1][1] - calQuad[0][1]) * u];
       const bot = [calQuad[3][0] + (calQuad[2][0] - calQuad[3][0]) * u, calQuad[3][1] + (calQuad[2][1] - calQuad[3][1]) * u];
       g.strokeStyle = 'rgba(255,255,255,0.28)';
@@ -2771,10 +2834,21 @@ kbd {
 
   function analyzeCal() {
     const c = $('#cal-photo');
-    if (!c || !calQuad) return;
-    const g = c.getContext('2d');
-    const data = g.getImageData(0, 0, c.width, c.height);
-    const samples = P.calib.sampleStrip(data, calQuad, 21);
+    if (!c || !calQuad || !calPhoto) return;
+    /* Se mide sobre la foto original, no sobre la copia que se ve en pantalla:
+       con 101 pasos la copia reducida no tiene píxeles para tanto parche.
+       El tope de 2400 px evita cargar 12 Mpx en memoria para nada. */
+    const s = Math.min(1, 2400 / calPhoto.width);
+    const k = (calPhoto.width / c.width) * s;
+    const off = document.createElement('canvas');
+    off.width = Math.round(calPhoto.width * s);
+    off.height = Math.round(calPhoto.height * s);
+    const og = off.getContext('2d', { willReadFrequently: true });
+    og.drawImage(calPhoto, 0, 0, off.width, off.height);
+    const data = og.getImageData(0, 0, off.width, off.height);
+    const n = calSteps();
+    const quad = calQuad.map(([x, y]) => [x * k, y * k]);
+    const samples = P.calib.sampleStrip(data, quad, n);
     const an = P.calib.analyze(samples);
     calAnalysis = an;
     $('#cal-result').hidden = false;
@@ -2782,7 +2856,7 @@ kbd {
     const st = $('#cal-stats');
     st.textContent = '';
     [
-      ['pasos leídos', '21 de 21'],
+      ['pasos leídos', n + ' de ' + n],
       ['mesetas', String(an.plateau)],
       ['inversiones', String(an.inversions)],
       ['ruido', an.noise.toFixed(0)]
@@ -2792,7 +2866,7 @@ kbd {
     const dg = $('#cal-diagnosis');
     dg.textContent = an.warnings.length
       ? an.warnings.map((w) => w.text).join(' ')
-      : 'La tira se lee bien: 21 pasos monótonos, sin mesetas. Guarda el perfil y úsalo con todas tus imágenes.';
+      : 'La tira se lee bien: ' + n + ' pasos monótonos, sin mesetas. Guarda el perfil y úsalo con todas tus imágenes.';
     $('#cal-name').value = $('#cal-name').value || ('Perfil ' + new Date().toLocaleDateString('es-ES'));
   }
 
@@ -3002,6 +3076,18 @@ kbd {
       printCanvas(c, 210, 297);
     });
     $('#btn-cal-save').addEventListener('click', () => download(calSheetFull(), 'prusia-carta-calibracion.png'));
+    const calStepsSel = $('#in-calsteps');
+    calStepsSel.value = String(calSteps());
+    calStepsSel.addEventListener('change', () => {
+      state.cal = { steps: Number(calStepsSel.value) };
+      save();
+      drawCalSheetPreview();
+      if (calPhoto) {
+        $('#cal-result').hidden = true;
+        calAnalysis = null;
+        U.toast('Tira de ' + calSteps() + ' pasos: vuelve a analizar la foto');
+      }
+    });
     $('#btn-cal-photo').addEventListener('click', () => $('#cal-file').click());
     $('#cal-file').addEventListener('change', (e) => {
       const f = e.target.files && e.target.files[0];
@@ -3074,6 +3160,11 @@ kbd {
 
     window.addEventListener('resize', () => {
       if (state.view === 'revelar') drawStage();
+      else if (state.view === 'calibrar' && calAnalysis) {
+        P.sheets.drawCurve($('#cal-curve'), calAnalysis.xs, calAnalysis.ys, {
+          residual: 'residuo ' + (calAnalysis.noise / 255).toFixed(3)
+        });
+      }
     });
 
     // zoom con rueda sobre el escenario
@@ -3105,7 +3196,10 @@ kbd {
     state: state,
     engine: () => engine,
     negative: () => makeNegative(),
-    profiles: () => profiles
+    profiles: () => profiles,
+    /* repintado síncrono: la app va por rAF y las pestañas en segundo plano
+       no lo reciben, así que las pruebas necesitan forzarlo */
+    redraw: () => { buildEngine(); drawStage(); renderReadouts(); syncHints(); }
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

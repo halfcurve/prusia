@@ -65,10 +65,16 @@ y el ajuste del pigmento contra anclas medidas (`fit-pigment.mjs`).
    reproducen las anclas medidas de laboratorio del azul de Prusia (L\* 88/82/62/42/26).
    Beer–Lambert da densidad por longitud de onda; CIE 1931 da el color que ves.
 2. **Proceso**: la respuesta `Q` (fracción de exposición → fracción de azul) sale de la
-   química o, mejor, de tu tira de 21 pasos. La copia = `Q(1 − densidad/alcance)`.
+   química o, mejor, de tu tira de pasos (21 a ojo, 51 o 101 escaneada). La copia =
+   `Q(1 − densidad/alcance)`.
 3. **Negativo**: exactamente la inversa. Se pide la densidad que hace falta, se recorta al
    tope real del soporte y se convierte en cobertura de tinta. Por eso los diagnósticos
    pueden decir «el film se queda en 1,65 D» en vez de mentir.
+
+La calibración cambia **el negativo**, no la copia: tú mides la respuesta real, Prusia la
+mete en la inversa y el azul vuelve a donde tenía que estar. Es la misma jugada que el
+método de Easy Digital Negatives, que también corrige con una tabla de 256 valores (un
+LUT) y desaconseja las curvas de Photoshop por su posterización.
 
 Números que sostienen el resto (detalle y fuentes en `research/`):
 
@@ -78,6 +84,42 @@ Números que sostienen el resto (detalle y fuentes en `research/`):
   de «tope del film» que aparece al elegir Ware.
 - El azul de Prusia absorbe en 690–730 nm (rojo) y refleja 455–475 nm; el color de la copia
   se calcula desde el espectro, no se elige de una paleta.
+
+## Lo que dicen las fuentes
+
+Lo que sigue no es folclore: está en los manuales de Jacquard y en la web de Easy Digital
+Negatives, y está aplicado en la app.
+
+**Jacquard** (manual del *Cyanotype Kit* y del *Cyanotype Sensitizer Set*):
+
+- Parte A: **40 g de ferricianuro potásico en 400 ml** de agua (10 %). Parte B: **100 g de
+  citrato férrico amónico en 400 ml** (25 %). Se mezclan **1:1** → 5 % + 12,5 %, que es un
+  **62 % de la clásica de Herschel**. Por eso el preset «Kit Jacquard» pide 1,05 D en vez de
+  1,15 y da un azul algo más suave (Dmáx 1,12 frente a 1,32).
+- La mezcla **aguanta 2–4 h**; las disoluciones madre, meses. Eso está en el aviso del preset.
+- Exposición: **1–30 min** según condiciones (su kit anuncia 10–20 min), y «pasarse casi
+  siempre se prefiere a quedarse corto».
+- Revelado: agua fría **al menos 5 min** hasta que salga clara; una gota de agua oxigenada
+  azula al instante y, sin ella, el color sube en **24 h**.
+- Virado: **blanqueo** en carbonato sódico (1–2 cucharaditas por litro, **menos de 5 min**)
+  hasta amarillo dorado, aclarado y baño de **tánico 2 %** o té (2–24 h). La app modela el
+  virado sobre el pigmento y llama «blanqueo» al paso previo, que es el que de verdad cambia
+  el color; tintar sin blanquear solo lo ensucia.
+
+**Easy Digital Negatives** (Peter Mrhar):
+
+- El negativo de calibración se imprime **espejado e invertido**, en **color** y sin ajustes
+  automáticos: igual que aquí (`Espejar el negativo`, modo Color, gestión desactivada).
+- Corrige con **tablas de 256 entradas** (mapeo/LUT), no con curvas: «la calidad de estas
+  correcciones es bastante pobre» — posterización y vecinos que se mueven. La app usa un LUT
+  monótono de 256 valores para el negativo y de 4096 para la previsualización.
+- Su regla de exposición: si sale velado, **a la mitad**; si sale corto, **al doble**. Los
+  botones de exposición de Prusia van en pasos, y cada paso dobla o reduce a la mitad.
+- Sobre la tinta: **la apariencia no predice el bloqueo UV**. Mrhar mide 57 tonos útiles con
+  un negativo rojizo frente a 23 con uno negro; en tintas Epson, Reeder y Anderson miden el
+  amarillo como el que más absorbe después del negro de foto. De ahí que la app no ordene
+  las tintas por lo bonitas que son y que la carta de calibración lleve una comparativa:
+  el orden bueno es el que sale en **tu** impresora.
 
 ## Licencia de la imagen de ejemplo
 

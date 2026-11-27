@@ -30,11 +30,11 @@
      en tintas de colorante: el amarillo absorbe 400-480 nm, justo la cola
      útil del cianotipo. */
   const INK = {
-    oliva:     { name: 'Oliva UV', rgb: [64, 128, 0], gain: 1.0, mode: 'Color', note: 'Amarillo dominante (Y100 M50 C75). El que más UV bloquea.' },
-    amarillo:  { name: 'Amarillo', rgb: [255, 216, 0], gain: 0.9, mode: 'Color', note: 'Amarillo puro: bloquea bien el azul-violeta con menos tinta.' },
-    compuesto: { name: 'Compuesto neutro', rgb: [22, 22, 22], gain: 0.85, mode: 'Color', note: 'Negro de los cuatro canales. Cómodo, algo menos denso.' },
-    negro:     { name: 'Negro puro (K)', rgb: [0, 0, 0], gain: 0.55, mode: 'Escala de grises', note: 'Solo tinta K. En dye bloquea poco UV: negativo plano.' },
-    magenta:   { name: 'Magenta', rgb: [200, 0, 120], gain: 0.5, mode: 'Color', note: 'Bloquea el verde, no el UV: el peor para cianotipia.' }
+    oliva:     { name: 'Oliva UV', rgb: [64, 128, 0], gain: 1.0, mode: 'Color', note: 'Amarillo dominante (Y100 M50 C75). Con tintas Epson el amarillo es el que más UV absorbe después del negro de foto.' },
+    amarillo:  { name: 'Amarillo', rgb: [255, 216, 0], gain: 0.95, mode: 'Color', note: 'Amarillo puro: absorbe 400-480 nm, la cola que el cianotipo todavía ve, y con menos tinta encima.' },
+    compuesto: { name: 'Compuesto neutro', rgb: [22, 22, 22], gain: 0.85, mode: 'Color', note: 'Los cuatro canales a la vez. Cómodo y sin sorpresas de color, algo menos denso en UV que el amarillo.' },
+    negro:     { name: 'Negro puro (K)', rgb: [0, 0, 0], gain: 0.55, mode: 'Escala de grises', note: 'Solo la tinta K. En tintas de colorante (esta impresora) está optimizada para el visible y se queda corta en UV: negativo plano.' },
+    magenta:   { name: 'Magenta', rgb: [200, 0, 120], gain: 0.5, mode: 'Color', note: 'Absorbe el verde y deja pasar el azul, o sea el UV: en teoría la peor. EDN mide lo contrario con otros juegos (57 tonos con un negativo rojizo frente a 23 en negro). No hay regla: hay pruebas.' }
   };
 
   /* ---------- construcción de la cadena ---------- */

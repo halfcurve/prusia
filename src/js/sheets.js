@@ -4,9 +4,11 @@
 (function (P) {
   'use strict';
   /* ---------- carta de calibración ---------- */
-  /* Un A4 con la tira de 21 pasos y una comparativa de tintas. */
+  /* Un A4 con la tira de pasos y una comparativa de tintas.
+     opt.steps: 21 (a ojo), 51 o 101 (escaneada, como las tablas de EDN). */
   function drawCalSheet(canvas, opt) {
     const dpi = (opt && opt.dpi) || 300;
+    const N = (opt && opt.steps) || 21;
     const mm = (v) => (v / 25.4) * dpi;
     const W = Math.round(mm(210)), H = Math.round(mm(297));
     canvas.width = W; canvas.height = H;
@@ -49,13 +51,13 @@
       fx += w + mm(6);
     }
 
-    // tira de 21 pasos
+    // tira de pasos
     const stripY = mm(62);
     const stripH = mm(26);
     const stripW = W - M * 2;
-    const stepW = stripW / 21;
-    for (let i = 0; i < 21; i++) {
-      g.fillStyle = inkPx(i / 20);
+    const stepW = stripW / N;
+    for (let i = 0; i < N; i++) {
+      g.fillStyle = inkPx(i / (N - 1));
       g.fillRect(M + i * stepW, stripY, Math.ceil(stepW) + 0.5, stripH);
     }
     g.strokeStyle = '#1f1f1f';
@@ -64,7 +66,8 @@
     g.font = `500 ${mm(2.3)}px ui-monospace, Menlo, monospace`;
     g.fillStyle = '#333';
     g.textAlign = 'center';
-    for (let i = 0; i < 21; i++) {
+    const every = N > 51 ? 10 : 1;
+    for (let i = 0; i < N; i += every) {
       g.fillText(String(i), M + (i + 0.5) * stepW, stripY + stripH + mm(4.5));
     }
     g.textAlign = 'left';
@@ -173,7 +176,8 @@
     for (let i = 0; i <= 120; i++) {
       const x = i / 120;
       const y = sp.at(x);
-      i ? g.lineTo(X(x), Y(y)) : g.moveTo(X(x), Y(y));
+      if (i === 0) g.moveTo(X(x), Y(y));
+      else g.lineTo(X(x), Y(y));
     }
     g.strokeStyle = '#4e8cc9';
     g.lineWidth = 2;

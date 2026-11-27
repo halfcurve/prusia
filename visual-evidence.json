@@ -6,11 +6,11 @@
   "sources": [
     {
       "path": "src/index.html",
-      "sha256": "202425e7ea7e78617ec4b39f55ae18c69c0d8bb1ba2ffcb961d40c85a8cbce84"
+      "sha256": "e5f7c1abee9c6d2857fa54b69fe22e801c8e03bdb12193f058d524b69c217672"
     },
     {
       "path": "src/styles.css",
-      "sha256": "ef37e3c5f5bdc29f074dd29572995fe55b535c683d2b04bc96ee8f537db50a06"
+      "sha256": "6f5142d24d61e545e4e1408eae543d979df72151e21c389095f8b6a7af6bdac1"
     },
     {
       "path": "src/js/sci.js",
@@ -18,19 +18,19 @@
     },
     {
       "path": "src/js/tone.js",
-      "sha256": "1ae0e2bacf5552c35a26b0308cc9e903cd05e986927b080f394c724d44f41a9d"
+      "sha256": "f5d630e207372ce9cf3572a7a25ade027bed811221443377187aedaf188affe3"
     },
     {
       "path": "src/js/engine.js",
-      "sha256": "fe89d249066798b43f7696588422b6a2bbbb69929035a7d02a4db0f679a0327f"
+      "sha256": "b46c0860d73ad9782c1b6757981a44289404b6593bd2a969719ca7f8ffc4da5f"
     },
     {
       "path": "src/js/calibrate.js",
-      "sha256": "bcff0e2b22160fffbe4a0fb63642a97ab528eff47df072d23c07b0c178a6d693"
+      "sha256": "ede7bd1fc97cf1c68b6b5e4fff4586b1bca5a163b4436dc0b48022da11d9b2cc"
     },
     {
       "path": "src/js/sheets.js",
-      "sha256": "adeb886beffcff864928038e59ea03432a2973d6556382fab12a8af1351061a5"
+      "sha256": "aa99d6cf902a03e88689b27d086c44603b721a5fbd9e50ba90f60301e3203b7a"
     },
     {
       "path": "src/js/render.js",
@@ -42,7 +42,7 @@
     },
     {
       "path": "src/js/app.js",
-      "sha256": "63c57e13fcb15e7f1f90e96ad58e573b65057bfd9292863b183d1b44a1d8384f"
+      "sha256": "c7daf36b8a73b1c5d0e2514036417e5e5daef624d368e8adf6203790ff9c4d56"
     }
   ],
   "requiredChecks": [
@@ -79,7 +79,7 @@
     {
       "id": "revelar-escritorio",
       "status": "pass",
-      "observed": "Tres columnas: negativo (296 px), preview sobre papel A4 centrado y controles del proceso (320 px). Una sola familia de grises cálidos, un único acento y cifras en mono.",
+      "observed": "Tres columnas: negativo (296 px), preview sobre papel A4 centrado y controles del proceso (320 px). Una sola familia de grises cálidos, un único acento y cifras en mono. Sin desbordamiento horizontal entre 390 y 1920 px.",
       "state": "Estado por defecto tras limpiar localStorage: química clásica, film OHP, tinta oliva, 1,15 D, papel blanco.",
       "environment": {
         "kind": "browser",
@@ -91,7 +91,7 @@
         {
           "path": "evidence/e1-revelar.png",
           "kind": "image",
-          "sha256": "49648ac9b9995594605c4d9ef71cae443f3a84db6486f184c87a99b4ee65c63c"
+          "sha256": "b2cf5e1c7133b04b1a773d247a976c438fdf6912f4af0b03e5fbd480ca5c60ca"
         }
       ]
     },
@@ -110,7 +110,7 @@
         {
           "path": "evidence/e2-virado.png",
           "kind": "image",
-          "sha256": "346966a1de2dfb3fea49ec692d56728e0b7ffac2ae356f0daa09754bc9e78a4a"
+          "sha256": "1cc42d520bc9c4f0c556b89d894d28611777749667cf45f82cbf540a193a6cdd"
         }
       ]
     },
@@ -129,14 +129,14 @@
         {
           "path": "evidence/e3-lado.png",
           "kind": "image",
-          "sha256": "5bc45749a22331980b6b7beef7578e8ebaf6db46c80dddfc0432127dc9217415"
+          "sha256": "39d6921a50445947607f43f42daa7e2c28e0c9b00344c102b6ff9c0233794d74"
         }
       ]
     },
     {
       "id": "calibracion-flujo",
       "status": "pass",
-      "observed": "Tira de 21 pasos fotografiada, cuatro esquinas arrastrables, análisis con 21 pasos monótonos, 0 inversiones, 2 mesetas y curva extraída con residuo 0,018.",
+      "observed": "Tira fotografiada, cuatro esquinas arrastrables y análisis: 21 pasos leídos, 0 mesetas, 0 inversiones, curva extraída con residuo 0,012. El perfil se guarda, se aplica y se puede quitar.",
       "state": "Carta impresa a 300 ppp, foto sintética de la tira revelada y análisis en el navegador.",
       "environment": {
         "kind": "browser",
@@ -148,8 +148,15 @@
         {
           "path": "evidence/e5-calibrar.png",
           "kind": "image",
-          "sha256": "708b0a3ca6acbb3dbefa2b6294e55202bc31fe95e2f80025ade3597812acb226"
+          "sha256": "b2cf5e1c7133b04b1a773d247a976c438fdf6912f4af0b03e5fbd480ca5c60ca"
         }
+      ],
+      "steps": [
+        "Imprimir la carta de 21 pasos",
+        "Fotografiarla y arrastrar las cuatro esquinas a los extremos de la tira",
+        "Analizar: 21 de 21 pasos, mesetas 0, inversiones 0",
+        "Guardar el perfil y comprobar que el negativo cambia",
+        "Quitar el perfil y comprobar que vuelve al modelo"
       ]
     },
     {
@@ -186,7 +193,7 @@
         {
           "path": "evidence/e4-movil.png",
           "kind": "image",
-          "sha256": "18b15b763370cd97d16d8bc4a24f8ea79fb95235dc259bd1fd3c536659534ebb"
+          "sha256": "95ce2d861723522e92ead3ac180b015a485e5f85b40be9711e80f9f6c7f12153"
         }
       ]
     },
@@ -205,7 +212,7 @@
         {
           "path": "evidence/e1-revelar.png",
           "kind": "image",
-          "sha256": "49648ac9b9995594605c4d9ef71cae443f3a84db6486f184c87a99b4ee65c63c"
+          "sha256": "b2cf5e1c7133b04b1a773d247a976c438fdf6912f4af0b03e5fbd480ca5c60ca"
         }
       ],
       "steps": [

@@ -141,7 +141,12 @@
     clasica: {
       name: 'Clásica (Herschel)', short: 'Clásica',
       range: 1.15, k: 1.25, toe: 0.06, shoulder: 0.12, printDmax: 1.32,
-      note: 'Citrato férrico amónico + ferricianuro potásico 1:1. Pierde casi la mitad de la escala tonal en el lavado.'
+      note: 'Citrato férrico amónico 20 % + ferricianuro potásico 8 %, 1:1. Pierde casi la mitad de la escala tonal en el lavado.'
+    },
+    jacquard: {
+      name: 'Kit Jacquard (A+B)', short: 'Jacquard',
+      range: 1.05, k: 1.28, toe: 0.06, shoulder: 0.13, printDmax: 1.12,
+      note: 'Las dos partes del kit: A 40 g/400 ml + B 100 g/400 ml, 1:1 → 5 % ferricianuro y 12,5 % citrato, un 62 % de la clásica. La mezcla aguanta 2-4 h: se hace justo antes.'
     },
     ware: {
       name: 'Nueva cianotipia (Ware)', short: 'Ware',
@@ -155,6 +160,9 @@
     }
   };
 
+  /* minutos de exposición al sol por química, con un negativo bien denso */
+  const EXPOSURE_MIN = { clasica: [3, 8], jacquard: [10, 20], ware: [2, 6], simple: [2, 5] };
+
   const SOURCE = {
     film: { name: 'Film de inyección (transparencia)', dr: 2.6, note: 'El soporte que mejor bloquea UV con tintas de colorante.' },
     papel: { name: 'Papel normal', dr: 1.9, note: 'Sirve, pero filtra menos UV: negativos más planos.' },
@@ -165,6 +173,6 @@
     mono: mono, invertMonotone: invertMonotone,
     yToL: yToL, lToY: lToY,
     toneCurve: toneCurve, responseCurve: responseCurve, responseFromSamples: responseFromSamples,
-    CHEM: CHEM, SOURCE: SOURCE
+    CHEM: CHEM, SOURCE: SOURCE, EXPOSURE_MIN: EXPOSURE_MIN
   };
 })(typeof window !== 'undefined' ? (window.P = window.P || {}) : (module.exports = {}));

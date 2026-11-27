@@ -119,22 +119,44 @@
     // imponer monotonía creciente con PAVA
     const ys = pava(ysRaw);
 
-    // mesetas: diferencias nulas sobre un tramo largo = sobreexposición
-    // mesetas interiores: los extremos saturados (tinta plena, film limpio)
-    // son normales y no indican sobreexposición
-    let plateau = 0;
-    for (let i = 3; i < n - 2; i++) if (ysRaw[i] - ysRaw[i - 1] < 0.004) plateau++;
-    const inversions = ysRaw.reduce((acc, v, i) => acc + (i > 0 && v < ysRaw[i - 1] - 0.01 ? 1 : 0), 0);
-
-    // ruido por parche
+    // ruido por parche (antes de fijar umbrales: con tiras finas manda él)
     const noise = samples.reduce((a, s) => a + s.spread, 0) / n;
+
+    // mesetas: diferencias nulas sobre un tramo largo = sobreexposición.
+    // Los extremos saturados (tinta plena, film limpio) son normales y no
+    // cuentan. El umbral escala con los pasos: con 101, dos parches seguidos
+    // distan cinco veces menos que con 21.
+    const edge = Math.max(2, Math.round(n * 0.06));
+    const inner = [];
+    for (let i = edge; i < n - edge; i++) inner.push(ysRaw[i] - ysRaw[i - 1]);
+    inner.sort((a, b) => a - b);
+    const best = inner.length ? inner[inner.length - 1] : 0;
+    // un paso es meseta si avanza menos del 2 % de lo que avanza el paso más
+    // vivo de la tira: el umbral vale igual para 21 pasos que para 101.
+    const plateauEps = Math.max(1e-4, best * 0.02);
+    let plateau = 0, run = 0;
+    for (let i = edge; i < n - edge; i++) {
+      if (ysRaw[i] - ysRaw[i - 1] < plateauEps) { run++; if (run > plateau) plateau = run; } else run = 0;
+    }
+    // una inversión menor que el propio ruido no es una inversión
+    const invThresh = Math.max(0.012, noise / 255);
+    const inversions = ysRaw.reduce((acc, v, i) => acc + (i > 0 && v < ysRaw[i - 1] - invThresh ? 1 : 0), 0);
 
     // contraste: pendiente media de la zona central
     const mid = ys[Math.round(n / 2)] - ys[Math.round(n / 4)];
     const warnings = [];
     if (ys[0] > 0.08) warnings.push({ level: 'warn', text: 'El paso más denso no llega a papel blanco: falta exposición o densidad de tinta.' });
     if (ys[n - 1] < 0.9) warnings.push({ level: 'warn', text: 'El paso transparente no llega a azul pleno: sube el tiempo de exposición.' });
-    if (plateau >= 4) warnings.push({ level: 'bad', text: 'Hay una meseta de ' + plateau + ' pasos: la copia está sobreexpuesta. Baja el tiempo y repite.' });
+    // si lo que separa un parche del siguiente es menos que el ruido de la
+    // propia foto, la tira es ilegible por fina, no por sobreexpuesta
+    const unreadable = best < Math.max(0.004, noise / 255 * 0.8);
+    if (unreadable) {
+      warnings.push({ level: 'warn', text: n > 21
+        ? 'No distingo un paso del siguiente: ni la mejor foto da para ' + n + ' parches. Escanéala o baja a 21 pasos.'
+        : 'No distingo un paso del siguiente: repite la foto con luz plana y la tira llenando el encuadre.' });
+    } else if (plateau >= Math.max(4, Math.round((n - 2 * edge) * 0.5))) {
+      warnings.push({ level: 'bad', text: 'La tira está plana en ' + plateau + ' pasos: la copia está sobreexpuesta. Baja el tiempo y repite.' });
+    }
     if (inversions > 1) warnings.push({ level: 'bad', text: 'La densidad no baja de forma monótona: la foto tiene reflejos o el film está manchado.' });
     if (noise > 9) warnings.push({ level: 'warn', text: 'Los parches están sucios (ruido ' + noise.toFixed(0) + '): repite la foto con luz plana.' });
     if (rDark > 250) warnings.push({ level: 'bad', text: 'La copia sale casi blanca: algo falló en la exposición.' });
