@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prusia — negativos para cianotipia</title>
+<meta name="description" content="Taller digital de negativos para cianotipia: prepara el negativo para tu impresora y mira cómo quedará la copia antes de exponer.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#121110">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c406b'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23cfe2ee' opacity='.9'/%3E%3C/svg%3E">
+<!--@css-->
+</head>
+<body>
+<a class="skip" href="#stage">Ir al área de imagen</a>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-name">Prusia</span>
+    <span class="brand-sub">negativos para cianotipia</span>
+  </div>
+
+  <nav class="tabs" role="tablist" aria-label="Vistas">
+    <button class="tab is-active" role="tab" aria-selected="true" data-view="revelar">Revelar</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="calibrar">Calibrar</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="imprimir">Imprimir</button>
+  </nav>
+
+  <div class="topbar-actions">
+    <span class="file-name" id="file-name" title="Ninguna imagen cargada">sin imagen</span>
+    <button class="btn btn-quiet" id="btn-sample" title="Cargar un fotograma de ejemplo">Ejemplo</button>
+    <button class="btn btn-primary" id="btn-open">Abrir imagen</button>
+    <input type="file" id="file-input" accept="image/*" multiple hidden>
+  </div>
+</header>
+
+<main class="app" id="app">
+
+  <!-- ============================ REVELAR ============================ -->
+  <section class="view view-revelar is-active" id="view-revelar" role="tabpanel" aria-label="Revelar">
+    <aside class="panel panel-neg" aria-label="Ajustes del negativo">
+      <div class="panel-head">
+        <h2>Negativo</h2>
+        <p class="panel-sub">Lo que se imprime</p>
+      </div>
+      <div class="panel-body" id="controls-neg"></div>
+    </aside>
+
+    <div class="stage" id="stage">
+      <div class="stage-bar">
+        <div class="segmented" id="mode-seg" role="group" aria-label="Qué se muestra">
+          <button data-mode="print" class="is-active">Cianotipia</button>
+          <button data-mode="neg">Negativo</button>
+          <button data-mode="orig">Original</button>
+          <button data-mode="side">Lado a lado</button>
+        </div>
+        <div class="stage-meta" id="stage-meta">A4 · 210 × 297 mm</div>
+      </div>
+
+      <div class="stage-ground" id="ground">
+        <div class="paper" id="paper">
+          <canvas id="cv-main" width="10" height="10"></canvas>
+          <div class="paper-edge" aria-hidden="true"></div>
+        </div>
+        <div class="drop-hint" id="drop-hint">
+          <div class="drop-inner">
+            <p class="drop-title">Arrastra una foto aquí</p>
+            <p class="drop-sub">o pulsa <kbd>⌘</kbd><kbd>O</kbd> para abrir · también puedes pegar con <kbd>⌘</kbd><kbd>V</kbd></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-foot">
+        <div class="readouts" id="readouts"></div>
+        <div class="warnings" id="warnings" role="status" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <aside class="panel panel-print" aria-label="Ajustes de la cianotipia">
+      <div class="panel-head">
+        <h2>Cianotipia</h2>
+        <p class="panel-sub">Lo que va a salir</p>
+      </div>
+      <div class="panel-body" id="controls-print"></div>
+    </aside>
+  </section>
+
+  <!-- ============================ CALIBRAR ============================ -->
+  <section class="view view-calibrar" id="view-calibrar" role="tabpanel" aria-label="Calibrar">
+    <div class="doc">
+      <header class="doc-head">
+        <p class="eyebrow">Calibración</p>
+        <h2>Tres pasos para que el negativo sea tuyo y no de una tabla</h2>
+        <p class="lede">Tu impresora, tu film, tu papel y tu agua. Imprime la carta, exponla, hazle una foto y Prusia aprende la respuesta real de tu cadena. A partir de ahí el resto es cálculo.</p>
+      </header>
+
+      <ol class="steps">
+        <li class="step" id="step-1">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3>Imprime la carta de calibración</h3>
+            <p>Una tira de 21 pasos más una comparativa de tintas. Imprímela tal cual, sin escalar, sobre el mismo film que uses siempre.</p>
+            <div class="step-actions">
+              <button class="btn btn-primary" id="btn-cal-sheet">Abrir la carta</button>
+              <button class="btn btn-quiet" id="btn-cal-save">Guardar PNG</button>
+            </div>
+            <p class="step-note">Expón la tira sobre una hoja sensibilizada hasta que el último paso salga azul pleno. Anota el tiempo: es tu <em>tiempo base</em>.</p>
+            <div class="cal-preview"><canvas id="cal-sheet" width="10" height="10"></canvas></div>
+          </div>
+        </li>
+
+        <li class="step" id="step-2">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3>Fotografía la copia revelada</h3>
+            <p>Luz de día, sin sombras duras, la tira llenando el encuadre. Vale foto del móvil: Prusia mide el canal rojo, que es donde el azul de Prusia absorbe.</p>
+            <div class="step-actions">
+              <button class="btn btn-primary" id="btn-cal-photo">Subir foto de la tira</button>
+              <input type="file" id="cal-file" accept="image/*" hidden>
+              <button class="btn btn-quiet" id="btn-cal-manual">Meter valores a mano</button>
+            </div>
+            <div class="cal-align" id="cal-align" hidden>
+              <p class="align-hint">Arrastra las cuatro esquinas hasta los extremos de la tira de pasos.</p>
+              <div class="align-wrap"><canvas id="cal-photo" width="10" height="10"></canvas></div>
+              <div class="step-actions">
+                <button class="btn btn-primary" id="btn-cal-analyze">Analizar la tira</button>
+                <button class="btn btn-quiet" id="btn-cal-reset">Otra foto</button>
+              </div>
+            </div>
+          </div>
+        </li>
+
+        <li class="step" id="step-3">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3>Guarda el perfil</h3>
+            <p>Prusia extrae la curva de respuesta medida y la deja disponible para todas tus imágenes.</p>
+            <div class="cal-result" id="cal-result" hidden>
+              <div class="cal-chart"><canvas id="cal-curve" width="10" height="10"></canvas></div>
+              <div class="cal-stats" id="cal-stats"></div>
+              <div class="step-actions">
+                <input class="input" id="cal-name" placeholder="Nombre del perfil (papel + química)" aria-label="Nombre del perfil">
+                <button class="btn btn-primary" id="btn-cal-save-profile">Guardar perfil</button>
+              </div>
+              <p class="step-note" id="cal-diagnosis"></p>
+            </div>
+            <div class="profiles" id="profiles"></div>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================ IMPRIMIR ============================ -->
+  <section class="view view-imprimir" id="view-imprimir" role="tabpanel" aria-label="Imprimir">
+    <div class="doc doc-2col">
+      <div class="col">
+        <header class="doc-head">
+          <p class="eyebrow">Salida</p>
+          <h2>El negativo, a tamaño exacto</h2>
+          <p class="lede">Se genera a la resolución que pidas y con el tamaño físico en milímetros. Nada de «ajustar a la página»: si la escala se va un 3 %, la copia no coincide nunca.</p>
+        </header>
+        <div class="panel-body panel-body-flat" id="controls-out"></div>
+        <div class="out-actions">
+          <button class="btn btn-primary" id="btn-export">Guardar negativo (PNG)</button>
+          <button class="btn btn-quiet" id="btn-print">Imprimir…</button>
+          <button class="btn btn-quiet" id="btn-ruler">Probar escala</button>
+        </div>
+        <p class="step-note" id="out-hint"></p>
+      </div>
+
+      <div class="col">
+        <div class="recipe">
+          <h3>Ajustes de la ET-2865</h3>
+          <p class="recipe-sub">Cuatro tintas de colorante, sin negro claro. Estos valores están detrás de la recomendación de tinta, no son decorativos.</p>
+          <dl class="recipe-list" id="recipe-list"></dl>
+          <h3 class="mt">Orden de trabajo</h3>
+          <ol class="recipe-steps">
+            <li>Imprime el negativo con los ajustes de arriba, sobre film. Deja secar 5 minutos antes de tocarlo.</li>
+            <li>Sensibiliza el papel, sécalo en oscuridad y coloca el negativo con la tinta <strong>contra</strong> el papel.</li>
+            <li>Expón (sol directo ~3-8 min; lámpara UV 365 nm ~2-4 min) y revela en agua corriente 5 minutos.</li>
+            <li>El azul sigue subiendo durante 24 h. Para verlo ya: una gota de agua oxigenada en el último baño.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!--@js-->
+</body>
+</html>

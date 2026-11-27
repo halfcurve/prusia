@@ -1,0 +1,221 @@
+{
+  "schemaVersion": "uizze.visual-evidence.v1",
+  "scope": "Prusia — taller de negativos de cianotipia: vista Revelar (negativo + copia), calibración por tira de pasos, salida a tamaño físico y adaptación a móvil.",
+  "platform": "web",
+  "comparison": "existing-system",
+  "sources": [
+    {
+      "path": "src/index.html",
+      "sha256": "202425e7ea7e78617ec4b39f55ae18c69c0d8bb1ba2ffcb961d40c85a8cbce84"
+    },
+    {
+      "path": "src/styles.css",
+      "sha256": "b0758bf9de62745dd93adf4f18e891afaff51510fd6c9853c628861abaa8dc8b"
+    },
+    {
+      "path": "src/js/sci.js",
+      "sha256": "71af1fab8463c176acb6b73c43331269d9b3b95234b0e329e04280432986bda8"
+    },
+    {
+      "path": "src/js/tone.js",
+      "sha256": "1ae0e2bacf5552c35a26b0308cc9e903cd05e986927b080f394c724d44f41a9d"
+    },
+    {
+      "path": "src/js/engine.js",
+      "sha256": "fe89d249066798b43f7696588422b6a2bbbb69929035a7d02a4db0f679a0327f"
+    },
+    {
+      "path": "src/js/calibrate.js",
+      "sha256": "bcff0e2b22160fffbe4a0fb63642a97ab528eff47df072d23c07b0c178a6d693"
+    },
+    {
+      "path": "src/js/sheets.js",
+      "sha256": "adeb886beffcff864928038e59ea03432a2973d6556382fab12a8af1351061a5"
+    },
+    {
+      "path": "src/js/render.js",
+      "sha256": "16213c1877a181a890fb7385a3d6655c19861e74f5bd06710e5eddcc0a513b14"
+    },
+    {
+      "path": "src/js/ui.js",
+      "sha256": "654c5d82201e5c07802e774af3c8dc2bffeb19f4a8caf8b4bd6b6b6aa9a6bffb"
+    },
+    {
+      "path": "src/js/app.js",
+      "sha256": "3b65a866e1afc7bb0c3bcfbc1bcd796c3c78ff33d47c5fe45b20af4a4259955c"
+    }
+  ],
+  "requiredChecks": [
+    {
+      "id": "revelar-escritorio",
+      "kind": "visual"
+    },
+    {
+      "id": "preview-reacciona",
+      "kind": "visual"
+    },
+    {
+      "id": "comparar-negativo",
+      "kind": "visual"
+    },
+    {
+      "id": "calibracion-flujo",
+      "kind": "visual"
+    },
+    {
+      "id": "negativo-exportado",
+      "kind": "visual"
+    },
+    {
+      "id": "movil-390",
+      "kind": "visual"
+    },
+    {
+      "id": "controles-sin-errores",
+      "kind": "interaction"
+    }
+  ],
+  "checks": [
+    {
+      "id": "revelar-escritorio",
+      "status": "pass",
+      "observed": "Tres columnas: negativo (296 px), preview sobre papel A4 centrado y controles del proceso (320 px). Una sola familia de grises cálidos, un único acento y cifras en mono.",
+      "state": "Estado por defecto tras limpiar localStorage: química clásica, film OHP, tinta oliva, 1,15 D, papel blanco.",
+      "environment": {
+        "kind": "browser",
+        "name": "Chrome for Testing (CDP)",
+        "width": 1440,
+        "height": 900
+      },
+      "artifacts": [
+        {
+          "path": "evidence/e1-revelar.png",
+          "kind": "image",
+          "sha256": "5b4e8d876dd64d3a8ab3d411b8ef14a3b8207910186f79cac88e3756a70b4364"
+        }
+      ]
+    },
+    {
+      "id": "preview-reacciona",
+      "status": "pass",
+      "observed": "Cambiar virado a ácido tánico, papel a crema y exposición a +0,25 cambia la copia: marrón púrpura sobre papel cálido, sin tocar la curva del negativo.",
+      "state": "Mismos ajustes de negativo; sólo se han movido los controles de la derecha.",
+      "environment": {
+        "kind": "browser",
+        "name": "Chrome for Testing (CDP)",
+        "width": 1440,
+        "height": 900
+      },
+      "artifacts": [
+        {
+          "path": "evidence/e2-virado.png",
+          "kind": "image",
+          "sha256": "346966a1de2dfb3fea49ec692d56728e0b7ffac2ae356f0daa09754bc9e78a4a"
+        }
+      ]
+    },
+    {
+      "id": "comparar-negativo",
+      "status": "pass",
+      "observed": "El modo lado a lado parte la hoja en dos: copia a la izquierda, negativo oliva espejado a la derecha, con la misma geometría de papel y margen.",
+      "state": "Química clásica con virado de tanino al 55 %.",
+      "environment": {
+        "kind": "browser",
+        "name": "Chrome for Testing (CDP)",
+        "width": 1440,
+        "height": 900
+      },
+      "artifacts": [
+        {
+          "path": "evidence/e3-lado.png",
+          "kind": "image",
+          "sha256": "5bc45749a22331980b6b7beef7578e8ebaf6db46c80dddfc0432127dc9217415"
+        }
+      ]
+    },
+    {
+      "id": "calibracion-flujo",
+      "status": "pass",
+      "observed": "Tira de 21 pasos fotografiada, cuatro esquinas arrastrables, análisis con 21 pasos monótonos, 0 inversiones, 2 mesetas y curva extraída con residuo 0,018.",
+      "state": "Carta impresa a 300 ppp, foto sintética de la tira revelada y análisis en el navegador.",
+      "environment": {
+        "kind": "browser",
+        "name": "Chrome for Testing (CDP)",
+        "width": 1440,
+        "height": 900
+      },
+      "artifacts": [
+        {
+          "path": "evidence/e5-calibrar.png",
+          "kind": "image",
+          "sha256": "708b0a3ca6acbb3dbefa2b6294e55202bc31fe95e2f80025ade3597812acb226"
+        }
+      ]
+    },
+    {
+      "id": "negativo-exportado",
+      "status": "pass",
+      "observed": "El PNG sale a tamaño físico con marcas de corte, etiqueta, margen de 6 mm e imagen espejada (la tinta va contra el papel).",
+      "state": "A4 210x297 mm a 110 ppp para la captura; a 360 ppp son 2976x4209 px.",
+      "environment": {
+        "kind": "browser",
+        "name": "Chrome for Testing (CDP)",
+        "width": 1440,
+        "height": 900
+      },
+      "artifacts": [
+        {
+          "path": "evidence/e6-negativo.png",
+          "kind": "image",
+          "sha256": "77938ace5026089b8e36349acf2a19741f6da7eb50a5a439f2dc73fc40b61328"
+        }
+      ]
+    },
+    {
+      "id": "movil-390",
+      "status": "pass",
+      "observed": "A 390x844 la barra superior se parte en dos filas, el escenario queda arriba a ancho completo y los paneles se apilan debajo; nada se solapa.",
+      "state": "Mismo estado que revelar-escritorio.",
+      "environment": {
+        "kind": "browser",
+        "name": "Chrome for Testing (CDP)",
+        "width": 390,
+        "height": 844
+      },
+      "artifacts": [
+        {
+          "path": "evidence/e4-movil.png",
+          "kind": "image",
+          "sha256": "18b15b763370cd97d16d8bc4a24f8ea79fb95235dc259bd1fd3c536659534ebb"
+        }
+      ]
+    },
+    {
+      "id": "controles-sin-errores",
+      "status": "pass",
+      "observed": "91 acciones sobre todos los select, sliders, swatches y modos: 0 excepciones y 0 rechazos, con el preview repintándose en cada paso.",
+      "state": "Barrido programático de todos los controles de los tres paneles y de los cuatro modos de vista.",
+      "environment": {
+        "kind": "browser",
+        "name": "Chrome for Testing (CDP)",
+        "width": 1440,
+        "height": 900
+      },
+      "artifacts": [
+        {
+          "path": "evidence/e1-revelar.png",
+          "kind": "image",
+          "sha256": "5b4e8d876dd64d3a8ab3d411b8ef14a3b8207910186f79cac88e3756a70b4364"
+        }
+      ],
+      "steps": [
+        "Recorrer cada select de los paneles negativo, proceso y salida eligiendo todas sus opciones",
+        "Llevar cada slider a mínimo, máximo y punto medio",
+        "Activar y desactivar los cuatro interruptores",
+        "Pulsar las cinco muestras de tinta y los cuatro botones de modo del escenario",
+        "Comprobar que window.onerror y unhandledrejection quedan vacíos"
+      ]
+    }
+  ],
+  "unresolved": []
+}
