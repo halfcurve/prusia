@@ -19,27 +19,41 @@ o directamente `docs/index.html` (es un archivo único, sin red, sin dependencia
 
 ## Qué hace
 
-**Revelar** — tres columnas: el negativo (lo que se imprime), la previsualización de la
-copia y los controles de la cianotipia. Vistas: *Cianotipia*, *Negativo*, *Original* y
-*Lado a lado*.
+**Revelar** es un estudio con la copia en medio y una bandeja de herramientas abajo.
+Abrir una herramienta abre su panel; en escritorio entra por la derecha y la foto no se
+tapa, en el móvil se mete debajo. El último control tocado queda armado y responde al
+**arrastre sobre la foto** (⇧ para ir fino), como en Snapseed. Todo entra en un historial:
+⌘Z / ⇧⌘Z, y la pestaña de historial salta a cualquier estado anterior.
 
-- **Negativo**: soporte (film OHP / papel / vellum), tinta de bloqueo, rango en log D
-  con seguimiento automático de la química, punto negro y blanco, medios tonos, contraste
-  y mezcla a gris.
-- **Cianotipia**: química (clásica / New Cyanotype / simple), exposición en pasos,
-  azul máximo, papel, oxidación (0-24 h), grano y virado (té, tanino, café, pirogalol,
-  níquel, fosfato, carbonato) con intensidad.
-- Los avisos de la barra inferior son de la cadena completa: si el film no da la densidad
-  que pide la química, lo dice con el número.
+- **Estilos**: ocho revelados (botánica, retrato, arquitectura, antiguo, platino…) con
+  miniatura real — se revela de verdad un recorte con tu química, no un filtro de color.
+- **Enfoque**: nitidez, estructura y claridad en luz lineal, con umbral contra el grano y
+  radio en fracción de imagen (el PNG sale igual que el preview).
+- **Desenfoque**: foco elíptico movible, transición y cuerpo de las luces.
+- **Efectos**: grano, viñeta, brillo difuso, contraste por bandas e irregularidad de
+  emulsión. Todo se imprime: está dentro del negativo.
+- **Ajustes**: punto negro y blanco, medios tonos, contraste y mezcla a gris.
+- **Negativo**: soporte (film OHP / papel / vellum), tinta de bloqueo y rango en log D con
+  seguimiento automático de la química.
+- **Cianotipia**: química (clásica / New Cyanotype / simple), exposición en pasos, azul
+  máximo, papel, oxidación (0-24 h), grano y virado (té, tanino, café, pirogalol, níquel,
+  fosfato, carbonato) con intensidad.
+- **Ver** y **Salida**: qué se muestra (copia, negativo, original, lado a lado), zoom,
+  comparación, tamaño en milímetros, resolución, margen y espejo.
+- **Fuentes**: cada cifra de la app con su procedencia —documentado, medido o estimado—,
+  para que se vea de un golpe qué está respaldado y qué es heurística.
+
+Los avisos de la barra inferior son de la cadena completa: si el film no da la densidad
+que pide la química, lo dice con el número.
 
 **Calibrar** — carta de 21 pasos + comparativa de tintas, foto de la tira revelada,
 ajuste de las cuatro esquinas y extracción de la curva real de *tu* cadena (regresión
 isotónica + spline monótono). El perfil queda guardado y se aplica a todo.
 
-**Imprimir** — tamaño de papel y márgenes en milímetros, resolución 360/720 ppp, espejo
-(obligatorio si pones la tinta contra el papel), marcas de corte y etiqueta. Exporta PNG
-a tamaño físico y también imprime desde el navegador con `@page` del tamaño exacto.
-Incluye una hoja de prueba de escala de 100 mm.
+**Imprimir** — el negativo tal cual va a salir, una lista de comprobación (densidad,
+espejo, margen, resolución, escala 100 %) y los tres botones: exportar PNG, imprimir desde
+el navegador con `@page` del tamaño exacto y hoja de prueba de escala de 100 mm. Al lado,
+los ajustes de la ET-2865 y el orden de trabajo de la copia.
 
 ## Cómo está hecho
 
@@ -53,6 +67,8 @@ Sin dependencias: HTML, CSS y JS que el navegador ejecuta tal cual.
 | `src/js/calibrate.js` | Muestreo de la tira con homografía, densidades, PAVA, diagnóstico y perfil |
 | `src/js/sheets.js` | Carta de calibración y gráfica de la curva |
 | `src/js/render.js` | Preview, exportación a tamaño físico, marcas, hoja de escala |
+| `src/js/develop.js` | Revelado antes del negativo: desenfoques separables, enfoque con umbral, grano con semilla, viñeta, brillo, contraste por bandas, emulsión |
+| `src/js/looks.js` | Los ocho estilos como juegos de parámetros, con miniatura revelada de verdad |
 | `src/js/ui.js` | Controles (slider, select, swatches, toggle, número) |
 | `src/js/app.js` | Estado, eventos, vistas, exportación e impresión |
 | `src/styles.css` | Sistema de diseño: un acento, cuatro grises cálidos, una escala de radios |
@@ -77,7 +93,10 @@ y el ajuste del pigmento contra anclas medidas (`fit-pigment.mjs`).
 La calibración cambia **el negativo**, no la copia: tú mides la respuesta real, Prusia la
 mete en la inversa y el azul vuelve a donde tenía que estar. Es la misma jugada que el
 método de Easy Digital Negatives, que también corrige con una tabla de 256 valores (un
-LUT) y desaconseja las curvas de Photoshop por su posterización.
+LUT) y desaconseja las curvas de Photoshop por su posterización. El revelado —enfoque,
+efectos— va **antes** de esa inversa: se aplica sobre la foto en luz lineal y sólo después
+se convierte en tinta, para que un cambio de color de un borde no se traduzca en un salto
+de densidad UV.
 
 Números que sostienen el resto (detalle y fuentes en `research/`):
 
@@ -85,6 +104,8 @@ Números que sostienen el resto (detalle y fuentes en `research/`):
   densidad UV**; a partir de ~60 % de cobertura la tinta se corre en el Pictorico.
 - Cianotipo clásico: rango **1,0–1,2 log D**. New Cyanotype: **1,8–2,4**. Ahí está el aviso
   de «tope del film» que aparece al elegir Ware.
+- El Dmáx de la copia (1,1–1,5 según química) **no lo publica nadie**: la app lo marca como
+  estimación en la herramienta Fuentes y deja el mando abierto.
 - El azul de Prusia absorbe en 690–730 nm (rojo) y refleja 455–475 nm; el color de la copia
   se calcula desde el espectro, no se elige de una paleta.
 
@@ -96,9 +117,11 @@ Negatives, y está aplicado en la app.
 **Jacquard** (manual del *Cyanotype Kit* y del *Cyanotype Sensitizer Set*):
 
 - Parte A: **40 g de ferricianuro potásico en 400 ml** de agua (10 %). Parte B: **100 g de
-  citrato férrico amónico en 400 ml** (25 %). Se mezclan **1:1** → 5 % + 12,5 %, que es un
-  **62 % de la clásica de Herschel**. Por eso el preset «Kit Jacquard» pide 1,05 D en vez de
-  1,15 y da un azul algo más suave (Dmáx 1,12 frente a 1,32).
+  citrato férrico amónico en 400 ml** (25 %). Se mezclan **1:1** → **5 % + 12,5 %**, que es
+  el 62 % de la fórmula tradicional de 20 %/8 % y la mitad de la de Ware (25 g + 10 g por
+  100 ml). Menos hierro en el papel: el preset «Kit Jacquard» da por eso un azul algo más
+  suave (Dmáx 1,12 frente a 1,32), aunque herede el rango de la clásica porque es la misma
+  química: Jacquard no publica densidades, sólo criterios cualitativos.
 - La mezcla **aguanta 2–4 h**; las disoluciones madre, meses. Eso está en el aviso del preset.
 - Exposición: **1–30 min** según condiciones (su kit anuncia 10–20 min), y «pasarse casi
   siempre se prefiere a quedarse corto».
@@ -123,6 +146,14 @@ Negatives, y está aplicado en la app.
   amarillo como el que más absorbe después del negro de foto. De ahí que la app no ordene
   las tintas por lo bonitas que son y que la carta de calibración lleve una comparativa:
   el orden bueno es el que sale en **tu** impresora.
+
+## Verificación de fuentes
+
+`research/verificacion-jacquard.md` y `research/verificacion-edn.md` son las auditorías
+cifra por cifra contra las fuentes primarias (ficha y manual de Jacquard; Easy Digital
+Negatives de Peter Mrhar), con citas textuales, la tabla de discrepancias y lo que **no**
+está respaldado. `research/` lleva además la ciencia del proceso y los límites medidos de
+la ET-2865. La herramienta **Fuentes** de la app es la versión corta de esos informes.
 
 ## Licencia de la imagen de ejemplo
 

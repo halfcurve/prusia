@@ -141,12 +141,14 @@
     clasica: {
       name: 'Clásica (Herschel)', short: 'Clásica',
       range: 1.15, k: 1.25, toe: 0.06, shoulder: 0.12, printDmax: 1.32,
-      note: 'Citrato férrico amónico 20 % + ferricianuro potásico 8 %, 1:1. Pierde casi la mitad de la escala tonal en el lavado.'
+      note: 'Citrato férrico amónico 20 % + ferricianuro potásico 8 %, a partes iguales: la fórmula tradicional más citada. Pierde casi la mitad de la escala tonal en el lavado.'
     },
     jacquard: {
       name: 'Kit Jacquard (A+B)', short: 'Jacquard',
-      range: 1.05, k: 1.28, toe: 0.06, shoulder: 0.13, printDmax: 1.12,
-      note: 'Las dos partes del kit: A 40 g/400 ml + B 100 g/400 ml, 1:1 → 5 % ferricianuro y 12,5 % citrato, un 62 % de la clásica. La mezcla aguanta 2-4 h: se hace justo antes.'
+      // rango heredado de la clásica: es la misma química, sólo más diluida.
+      // Jacquard no publica densidades, sólo criterios cualitativos.
+      range: 1.15, k: 1.28, toe: 0.06, shoulder: 0.13, printDmax: 1.12,
+      note: 'Las dos partes del kit: A 40 g de ferricianuro en 400 ml y B 100 g de citrato en 400 ml, 1:1 → 5 % y 12,5 %, el 62 % de la clásica de 20 %/8 % y la mitad de la de Ware (25 g + 10 g por 100 ml). Menos hierro en el papel, algo menos de azul máximo. La mezcla aguanta 2-4 h: se hace justo antes.'
     },
     ware: {
       name: 'Nueva cianotipia (Ware)', short: 'Ware',

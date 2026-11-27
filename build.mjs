@@ -8,7 +8,7 @@ import path from 'path';
 const ROOT = path.dirname(new URL(import.meta.url).pathname);
 const read = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
 
-const JS_ORDER = ['sci.js', 'tone.js', 'engine.js', 'calibrate.js', 'sheets.js', 'render.js', 'ui.js', 'app.js'];
+const JS_ORDER = ['sci.js', 'tone.js', 'engine.js', 'develop.js', 'looks.js', 'calibrate.js', 'sheets.js', 'render.js', 'ui.js', 'app.js'];
 const js = JS_ORDER.map((f) => read('src/js/' + f)).join('\n');
 const css = read('src/styles.css');
 let html = read('src/index.html');

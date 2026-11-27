@@ -2,9 +2,9 @@
 <html lang="es" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Prusia — negativos para cianotipia</title>
-<meta name="description" content="Taller digital de negativos para cianotipia: prepara el negativo para tu impresora y mira cómo quedará la copia antes de exponer.">
+<meta name="description" content="Taller digital de negativos para cianotipia: revela la foto, prepárala para tu impresora y mira cómo quedará la copia antes de exponer.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#121110">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c406b'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23cfe2ee' opacity='.9'/%3E%3C/svg%3E">
@@ -133,12 +133,26 @@ body {
 /* ----------------------------------------------------------------- views */
 .app { height: calc(100dvh - 54px); }
 .view { display: none; height: 100%; }
-.view.is-active { display: grid; }
+.view.is-active { display: grid; grid-template-columns: minmax(0, 1fr); }
 
-.view-revelar {
-  grid-template-columns: 296px minmax(0, 1fr) 320px;
+/* ---------------------------------------------------- estudio / revelar */
+/* Rejilla de dos estados: sin panel, la foto ocupa todo y la bandeja va abajo;
+   con panel, en escritorio entra por la derecha (la foto no se tapa) y en
+   pantalla estrecha se mete debajo, como en una app de móvil. */
+.studio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "stage sheet"
+    "rail  rail";
+  height: 100%; min-height: 0;
+  background: var(--bg-deep);
+  overflow: hidden;
   animation: viewIn 0.32s var(--ease);
 }
+.stage { grid-area: stage; }
+.tray { grid-area: rail; }
 @keyframes viewIn { from { opacity: 0; } to { opacity: 1; } }
 
 /* ---------------------------------------------------------------- paneles */
@@ -255,7 +269,7 @@ body {
 .swatch.is-active { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--accent); }
 
 /* ------------------------------------------------------------------ stage */
-.stage { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--bg-deep); }
+.stage { flex: 1 1 auto; display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--bg-deep); position: relative; }
 .stage-bar {
   display: flex; align-items: center; gap: 12px;
   padding: 10px 16px; border-bottom: 1px solid var(--line-soft); flex: none;
@@ -265,7 +279,7 @@ body {
 .stage-ground {
   flex: 1; min-width: 0; min-height: 0; display: grid; place-items: center; position: relative;
   overflow: hidden;
-  padding: 26px;
+  padding: 32px 26px 26px;
   background:
     radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, 0.028), transparent 62%),
     radial-gradient(90% 120% at 50% 120%, rgba(0, 0, 0, 0.5), transparent 60%);
@@ -390,35 +404,367 @@ kbd {
 
 /* ------------------------------------------------------------ responsive */
 @media (max-width: 1180px) {
-  .view-revelar { grid-template-columns: 264px minmax(0, 1fr) 288px; }
+  .sheet-body { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
 }
 @media (max-width: 1120px) {
   .brand-sub { display: none; }
 }
 @media (max-width: 1000px) {
   .file-name { display: none; }
-  body { overflow: auto; }
-  .app { height: auto; }
-  .view-revelar.is-active { display: flex; flex-direction: column; }
-  .panel { border-right: 0; border-left: 0; border-top: 1px solid var(--line); max-height: none; }
-  .panel-body { overflow: visible; }
-  .stage { min-height: 62vh; order: -1; border-bottom: 1px solid var(--line); }
+  .stage-meta { display: none; }
   .doc-2col { grid-template-columns: minmax(0, 1fr); gap: 28px; }
   .doc { padding: 26px 18px 60px; }
   .doc-head h2 { font-size: 22px; }
+  .studio { grid-template-columns: minmax(0, 1fr); grid-template-areas: "stage" "sheet" "rail"; }
+  .tray-sheet {
+    width: auto; align-self: end; max-height: 46vh;
+    border-left: 0; border-top: 1px solid var(--line);
+    box-shadow: 0 -18px 40px -28px rgba(0, 0, 0, 0.95);
+  }
+  @keyframes sheetIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 }
-@media (max-width: 700px) {
+@media (max-width: 760px) {
   .topbar { gap: 10px; padding: 0 10px; flex-wrap: wrap; height: auto; padding-block: 8px; }
   .tabs { order: 3; width: 100%; }
-  .stage-bar { flex-wrap: wrap; }
-  .stage-meta { display: none; }
+  .app { height: auto; min-height: calc(100dvh - 54px); }
+  .studio { min-height: calc(100dvh - 54px); }
+  .sheet-body { grid-template-columns: minmax(0, 1fr); padding: 12px 14px 16px; }
+  .stage-bar { flex-wrap: wrap; gap: 8px; padding: 8px 12px; }
+  .stage-ground { padding: 14px; }
+  .stage-foot { padding: 8px 12px; }
+  .readouts { gap: 12px; }
+  .tray-sheet { max-height: 54vh; }
+  .tray-rail { padding: 4px 6px calc(4px + env(safe-area-inset-bottom, 0px)); }
+  .tool { min-width: 56px; font-size: 10px; }
   .step { grid-template-columns: 1fr; }
   .step-num { display: none; }
+  .stackpanel { width: calc(100% - 28px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
 }
+
+/* ======================================================================
+   ESTUDIO — bandeja de herramientas estilo Snapseed
+   La foto manda: la bandeja es una franja, no una columna. Al abrir una
+   herramienta, la bandeja crece hacia arriba y la foto se encoge un poco.
+   ====================================================================== */
+.tray {
+  flex: none; display: flex; flex-direction: column;
+  background: linear-gradient(180deg, #171513, #131110);
+  border-top: 1px solid var(--line);
+  position: relative; z-index: 6;
+}
+
+.tray-sheet {
+  grid-area: sheet;
+  width: 392px; min-height: 0; align-self: start; max-height: 100%;
+  display: flex; flex-direction: column;
+  border-left: 1px solid var(--line);
+  background: linear-gradient(180deg, #1e1a18, var(--panel) 40%);
+  box-shadow: -18px 0 42px -30px rgba(0, 0, 0, 0.95);
+  animation: sheetIn 0.2s var(--ease);
+  overflow: hidden;
+  container-type: inline-size;
+}
+/* en el muelle lateral no cabe la entradilla de una línea: mejor el texto
+   largo de dentro que dos frases a medias */
+@container (max-width: 430px) {
+  .sheet-note { display: none; }
+}
+.tray-sheet[hidden] { display: none; }
+@keyframes sheetIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
+
+.sheet-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 16px 9px 10px; flex: none;
+  border-bottom: 1px solid var(--line-soft);
+}
+.sheet-back {
+  appearance: none; border: 0; background: rgba(255, 255, 255, 0.05); cursor: pointer;
+  width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center;
+  color: var(--ink-2); flex: none; transition: background 0.14s var(--ease), color 0.14s var(--ease);
+}
+.sheet-back:hover { background: rgba(255, 255, 255, 0.1); color: var(--ink); }
+.sheet-back svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.sheet-title { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: -0.005em; flex: none; }
+.sheet-note {
+  margin: 0; font-size: 11.5px; color: var(--muted-2); min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sheet-reset {
+  margin-left: auto; appearance: none; border: 1px solid var(--line); background: transparent;
+  color: var(--muted); font: inherit; font-size: 11.5px; cursor: pointer;
+  padding: 5px 10px; border-radius: var(--r-pill); flex: none;
+  transition: color 0.14s var(--ease), border-color 0.14s var(--ease);
+}
+.sheet-reset:hover { color: var(--ink); border-color: #3a3532; }
+
+.tray-sheet::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 26px; z-index: 2;
+  background: linear-gradient(180deg, rgba(25, 23, 21, 0), rgba(25, 23, 21, 0.96));
+  pointer-events: none; opacity: 0; transition: opacity 0.18s var(--ease);
+  border-radius: 0 0 var(--r-panel) var(--r-panel);
+}
+.tray-sheet.has-overflow::after { opacity: 1; }
+.tray-sheet { overflow: hidden; }
+
+.sheet-alert { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; flex: none; }
+.sheet-alert[hidden] { display: none; }
+
+.sheet-body {
+  padding: 14px 18px 18px;
+  max-width: 1560px; margin-inline: auto; width: 100%;
+  overflow-y: auto; overscroll-behavior: contain; min-height: 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(212px, 1fr));
+  gap: 0 26px; align-content: start;
+  scrollbar-width: thin; scrollbar-color: #3a3532 transparent;
+}
+.sheet-body > .group { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); gap: 0 26px; align-items: start; }
+.sheet-body > .group > .group-title { grid-column: 1 / -1; }
+.sheet-body > .group > .ctl { min-width: 0; }
+.sheet-body > .sheet-wide { grid-column: 1 / -1; }
+.sheet-body > .group:first-child { border-top: 0; padding-top: 0; }
+
+/* fila de control activa: la que responde al arrastre sobre la foto */
+.ctl.is-armed .ctl-label { color: var(--ink); }
+.ctl.is-armed .ctl-val { color: var(--accent); }
+.ctl.is-armed .slider::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(78, 140, 201, 0.3); }
+
+/* ------------------------------------------------------------------ rail */
+.tray-rail {
+  display: flex; align-items: stretch; gap: 2px;
+  justify-content: safe center;
+  padding: 6px 10px calc(6px + env(safe-area-inset-bottom, 0px));
+  overflow-x: auto; scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.tray-rail::-webkit-scrollbar { display: none; }
+
+.tool {
+  appearance: none; border: 0; background: none; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  min-width: 62px; padding: 6px 8px 7px; border-radius: 10px;
+  color: var(--muted); font: inherit; font-size: 10.5px; font-weight: 500; letter-spacing: 0.005em;
+  position: relative; flex: none;
+  transition: color 0.14s var(--ease), background 0.14s var(--ease);
+}
+.tool svg {
+  width: 21px; height: 21px; fill: none; stroke: currentColor;
+  stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+}
+.tool:hover { color: var(--ink-2); background: rgba(255, 255, 255, 0.045); }
+.tool.is-active { color: var(--ink); background: rgba(78, 140, 201, 0.16); }
+.tool.is-active svg { stroke: #9dc4e4; }
+.tool.has-edits::after {
+  content: ""; position: absolute; top: 7px; right: 12px;
+  width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 0 2px #14120f;
+}
+.tool-sep { width: 1px; background: var(--line-soft); margin: 8px 6px; flex: none; }
+
+/* ----------------------------------------------------- acciones del stage */
+.stage-acts { display: flex; gap: 2px; margin-left: auto; }
+.iconbtn {
+  appearance: none; border: 0; background: none; cursor: pointer;
+  width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center;
+  color: var(--muted); transition: color 0.14s var(--ease), background 0.14s var(--ease);
+}
+.iconbtn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.iconbtn:hover { color: var(--ink); background: rgba(255, 255, 255, 0.06); }
+.iconbtn[disabled] { opacity: 0.3; pointer-events: none; }
+.iconbtn.is-on { color: #9dc4e4; background: rgba(78, 140, 201, 0.18); }
+
+/* ------------------------------------------------- píldora de arrastre */
+.drag-pill {
+  position: absolute; top: 5px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 14px; border-radius: var(--r-pill);
+  background: rgba(10, 9, 8, 0.82); border: 1px solid var(--line);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.8);
+  pointer-events: none; z-index: 4;
+}
+.drag-pill[hidden] { display: none; }
+.dp-k { font-size: 11px; color: var(--muted); letter-spacing: 0.02em; }
+.dp-v { font: 600 12px/1 var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; min-width: 46px; text-align: right; }
+.dp-v::after { content: ""; display: inline-block; width: 22px; height: 2px; margin-left: 8px; vertical-align: middle; background: linear-gradient(90deg, var(--accent), rgba(78, 140, 201, 0.15)); border-radius: 2px; }
+
+.stage-ground.is-adjusting { cursor: ns-resize; }
+.stage-ground.is-adjusting .paper { cursor: ns-resize; }
+
+/* ------------------------------------------------------- historial / stack */
+.stackpanel {
+  position: absolute; right: 14px; top: 52px; width: 258px; max-height: 62%;
+  overflow-y: auto; z-index: 7;
+  background: rgba(20, 18, 16, 0.96); border: 1px solid var(--line);
+  border-radius: var(--r-panel); box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.85);
+  padding: 8px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  scrollbar-width: thin;
+}
+.stackpanel[hidden] { display: none; }
+.stack-title { margin: 4px 8px 8px; font-size: 10.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted-2); font-weight: 600; }
+.stack-item {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  appearance: none; border: 0; background: none; cursor: pointer; text-align: left;
+  padding: 7px 8px; border-radius: 8px; color: var(--muted);
+  font: inherit; font-size: 12px;
+}
+.stack-item:hover { background: rgba(255, 255, 255, 0.05); color: var(--ink-2); }
+.stack-item.is-current { background: rgba(78, 140, 201, 0.14); color: var(--ink); }
+.stack-item.is-future { opacity: 0.42; }
+.stack-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex: none; opacity: 0.6; }
+.stack-time { margin-left: auto; font: 500 10.5px/1 var(--mono); color: var(--muted-2); }
+.stack-empty { padding: 10px 8px; font-size: 11.5px; color: var(--muted-2); }
+
+/* ------------------------------------------------------------ miniaturas */
+.looks { grid-column: 1 / -1; display: flex; gap: 10px; overflow-x: auto; padding: 2px 0 10px; scrollbar-width: thin; }
+.look {
+  appearance: none; border: 0; background: none; cursor: pointer; padding: 0; flex: none;
+  display: flex; flex-direction: column; gap: 6px; width: 78px; color: var(--muted);
+  font: inherit; font-size: 10.5px; text-align: center;
+}
+.look canvas {
+  width: 78px; height: 78px; border-radius: 9px; display: block;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1) inset, 0 4px 12px -4px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(135deg, #1d3a52, #0c2334);
+  transition: box-shadow 0.16s var(--ease), transform 0.16s var(--ease);
+}
+.look:hover canvas { transform: translateY(-1px); }
+.look.is-active canvas { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+.look.is-active { color: var(--ink); }
+.look-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ----------------------------------------------------------- ficha fuentes */
+.fuentes { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 14px; }
+.fuente-grupo { border: 1px solid var(--line-soft); border-radius: var(--r-card); overflow: hidden; }
+.fuente-grupo h3 {
+  margin: 0; padding: 9px 13px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted-2); background: rgba(255, 255, 255, 0.022); font-weight: 600;
+}
+.fuente-fila {
+  display: grid; grid-template-columns: minmax(90px, 0.9fr) minmax(0, 1.1fr) auto;
+  gap: 10px; align-items: baseline; padding: 8px 13px; border-top: 1px solid var(--line-soft);
+  font-size: 12px;
+}
+.fuente-fila:first-of-type { border-top: 0; }
+.fuente-fila b { font-weight: 500; color: var(--ink-2); }
+.fuente-fila span { color: var(--muted); font-size: 11.5px; line-height: 1.45; }
+.tag {
+  font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 600;
+  padding: 2px 7px; border-radius: var(--r-pill); white-space: nowrap;
+  background: rgba(255, 255, 255, 0.06); color: var(--muted);
+}
+.tag.doc { background: rgba(95, 158, 110, 0.14); color: #7fb98d; }
+.tag.medido { background: rgba(78, 140, 201, 0.16); color: #8fbde8; }
+.tag.estimado { background: rgba(201, 162, 39, 0.12); color: #d8b451; }
+
+/* ------------------------------------------------- notas dentro del sheet */
+.sheet-lead {
+  margin: 0 0 10px; font-size: 11.5px; line-height: 1.5; color: var(--muted-2);
+  max-width: 100ch;
+}
+.look-note {
+  grid-column: 1 / -1; margin: 0 0 10px; font-size: 11.5px; line-height: 1.55;
+  color: var(--muted); max-width: 78ch;
+}
+.sheet-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.sheet-seg {
+  display: inline-flex; gap: 2px; padding: 2px; width: fit-content;
+  background: rgba(0, 0, 0, 0.35); border: 1px solid var(--line-soft); border-radius: var(--r-pill);
+}
+.sheet-seg button {
+  appearance: none; border: 0; background: none; cursor: pointer; font: inherit; font-size: 11.5px;
+  color: var(--muted); padding: 5px 12px; border-radius: var(--r-pill);
+  transition: color 0.14s var(--ease), background 0.14s var(--ease);
+}
+.sheet-seg button:hover { color: var(--ink-2); }
+.sheet-seg button.is-active { background: var(--panel-3); color: var(--ink); }
+.recipe-fine {
+  margin: 18px 0 0; padding-top: 14px; border-top: 1px solid var(--line-soft);
+  font-size: 11px; line-height: 1.55; color: var(--muted-2);
+}
+.recipe-fine code { font: 500 10.5px/1 var(--mono); color: var(--ink-2); }
+
+/* la foto puede arrastrarse cuando hay un control armado */
+.stage-ground { touch-action: none; }
+
+/* ------------------------------------------- tarjeta del negativo a imprimir */
+.out-card {
+  margin: 0 0 22px; padding: 18px; display: flex; gap: 20px; align-items: center;
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--line-soft); border-radius: var(--r-panel);
+}
+.out-shot {
+  flex: none; padding: 8px; background: #0c0b0a; border-radius: var(--r-md);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 10px 24px -14px #000;
+  line-height: 0;
+}
+.out-shot canvas {
+  display: block; width: auto; max-width: 168px; max-height: 232px;
+  border-radius: 2px; background: #fff;
+}
+.out-card figcaption { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.out-dims { margin: 0; font: 500 13px/1.3 var(--mono); color: var(--ink); letter-spacing: -0.01em; }
+.out-sub { margin: 0; font: 400 11.5px/1.45 var(--mono); color: var(--muted); }
+.out-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.linkbtn {
+  appearance: none; background: none; border: 0; padding: 0; font: inherit; cursor: pointer;
+  color: var(--accent-2); text-decoration: underline; text-underline-offset: 2px;
+}
+.linkbtn:hover { color: var(--ink); }
+
+/* ------------------------------------------------------- lista de comprobación */
+.checklist { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 1px; }
+.checklist li {
+  display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; align-items: start;
+  padding: 10px 0; font-size: 12px; line-height: 1.5; color: var(--muted);
+  border-top: 1px solid var(--line-soft);
+}
+.checklist li:first-child { border-top: 0; padding-top: 0; }
+.checklist b { display: block; font-weight: 500; color: var(--ink-2); }
+.checklist .mark {
+  width: 16px; height: 16px; margin-top: 1px; border-radius: 50%;
+  display: grid; place-items: center; font: 600 10px/1 var(--mono);
+  background: rgba(255, 255, 255, 0.06); color: var(--muted-2);
+}
+.checklist .ok .mark { background: rgba(95, 158, 110, 0.16); color: #7fb98d; }
+.checklist .warn .mark { background: rgba(206, 150, 70, 0.16); color: #d3a05d; }
+
+/* en un panel estrecho, la ficha se lee en dos líneas, no en columnas de 90 px */
+@container (max-width: 430px) {
+  .fuente-fila { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+  .fuente-fila b { flex: 1 1 auto; }
+  .fuente-fila .tag { flex: none; order: 1; }
+  .fuente-fila > span:not(.tag) { flex: 1 0 100%; order: 2; }
+}
+
+/* ------------------------------------------------------------ móvil fino */
+@media (max-width: 760px) {
+  .stage-bar { flex-wrap: nowrap; gap: 8px; }
+  .stage-bar .segmented { flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+  .stage-bar .segmented::-webkit-scrollbar { display: none; }
+  .stage-bar .segmented button { flex: none; }
+  .stage-acts { flex: none; }
+  .drag-pill { max-width: calc(100% - 20px); }
+  .drag-pill .dp-k { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+@media (max-width: 640px) {
+  /* en un móvil los cuatro números no caben y no son lo que se mira:
+     se quedan sólo los avisos, que sí piden acción */
+  .readouts { display: none; }
+  .stage-foot { padding: 7px 12px; }
+  .warnings { flex: 1 1 auto; justify-content: flex-end; }
+  .drag-pill { font-size: 11px; padding: 5px 10px; }
+  .tray-sheet { max-height: 40vh; }
+}
+
+.stage-bar .segmented button { white-space: nowrap; flex: none; }
+
+/* acciones del panel: la principal ocupa su fila, las dos secundarias se reparten */
+.sheet-actions .btn-primary { flex: 1 0 100%; }
+.sheet-actions .btn-quiet { flex: 1 1 0; min-width: 0; }
 
 </style>
 </head>
@@ -450,51 +796,76 @@ kbd {
 
   <!-- ============================ REVELAR ============================ -->
   <section class="view view-revelar is-active" id="view-revelar" role="tabpanel" aria-label="Revelar">
-    <aside class="panel panel-neg" aria-label="Ajustes del negativo">
-      <div class="panel-head">
-        <h2>Negativo</h2>
-        <p class="panel-sub">Lo que se imprime</p>
-      </div>
-      <div class="panel-body" id="controls-neg"></div>
-    </aside>
+    <div class="studio">
 
-    <div class="stage" id="stage">
-      <div class="stage-bar">
-        <div class="segmented" id="mode-seg" role="group" aria-label="Qué se muestra">
-          <button data-mode="print" class="is-active">Cianotipia</button>
-          <button data-mode="neg">Negativo</button>
-          <button data-mode="orig">Original</button>
-          <button data-mode="side">Lado a lado</button>
-        </div>
-        <div class="stage-meta" id="stage-meta">A4 · 210 × 297 mm</div>
-      </div>
-
-      <div class="stage-ground" id="ground">
-        <div class="paper" id="paper">
-          <canvas id="cv-main" width="10" height="10"></canvas>
-          <div class="paper-edge" aria-hidden="true"></div>
-        </div>
-        <div class="drop-hint" id="drop-hint">
-          <div class="drop-inner">
-            <p class="drop-title">Arrastra una foto aquí</p>
-            <p class="drop-sub">o pulsa <kbd>⌘</kbd><kbd>O</kbd> para abrir · también puedes pegar con <kbd>⌘</kbd><kbd>V</kbd></p>
+      <div class="stage" id="stage">
+        <div class="stage-bar">
+          <div class="segmented" id="mode-seg" role="group" aria-label="Qué se muestra">
+            <button data-mode="print" class="is-active">Cianotipia</button>
+            <button data-mode="neg">Negativo</button>
+            <button data-mode="orig">Foto</button>
+            <button data-mode="side">Lado a lado</button>
+          </div>
+          <div class="stage-meta" id="stage-meta">A4 · 210 × 297 mm</div>
+          <div class="stage-acts">
+            <button class="iconbtn" id="btn-undo" title="Deshacer (⌘Z)" aria-label="Deshacer" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7H5v3"/><path d="M5.5 9.5A7 7 0 1 1 12 19"/></svg>
+            </button>
+            <button class="iconbtn" id="btn-redo" title="Rehacer (⇧⌘Z)" aria-label="Rehacer" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 7h3v3"/><path d="M18.5 9.5A7 7 0 1 0 12 19"/></svg>
+            </button>
+            <button class="iconbtn" id="btn-compare" title="Mantén para ver la foto original" aria-label="Comparar con la original">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 5v14"/></svg>
+            </button>
+            <button class="iconbtn" id="btn-stack" title="Historial de ajustes" aria-label="Historial de ajustes" aria-expanded="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 2"/></svg>
+            </button>
           </div>
         </div>
+
+        <div class="stage-ground" id="ground">
+          <div class="paper" id="paper">
+            <canvas id="cv-main" width="10" height="10"></canvas>
+            <div class="paper-edge" aria-hidden="true"></div>
+          </div>
+          <div class="drop-hint" id="drop-hint">
+            <div class="drop-inner">
+              <p class="drop-title">Arrastra una foto aquí</p>
+              <p class="drop-sub">o pulsa <kbd>⌘</kbd><kbd>O</kbd> para abrir · también puedes pegar con <kbd>⌘</kbd><kbd>V</kbd></p>
+            </div>
+          </div>
+          <div class="drag-pill" id="drag-pill" hidden>
+            <span class="dp-k" id="dp-k">Nitidez</span>
+            <span class="dp-v" id="dp-v">0</span>
+          </div>
+        </div>
+
+        <div class="stackpanel" id="stackpanel" hidden></div>
+
+        <div class="stage-foot">
+          <div class="readouts" id="readouts"></div>
+          <div class="warnings" id="warnings" role="status" aria-live="polite"></div>
+        </div>
       </div>
 
-      <div class="stage-foot">
-        <div class="readouts" id="readouts"></div>
-        <div class="warnings" id="warnings" role="status" aria-live="polite"></div>
+      <div class="tray" id="tray">
+        <div class="tray-rail" id="tray-rail" role="toolbar" aria-label="Herramientas"></div>
       </div>
+
+      <div class="tray-sheet" id="tray-sheet" hidden>
+          <div class="sheet-head">
+            <button class="sheet-back" id="sheet-back" aria-label="Volver a herramientas">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 6l-6 6 6 6"/></svg>
+            </button>
+            <h2 class="sheet-title" id="sheet-title">Enfoque</h2>
+            <p class="sheet-note" id="sheet-note"></p>
+            <div class="sheet-alert" id="sheet-alert" hidden></div>
+            <button class="sheet-reset" id="sheet-reset">Reiniciar</button>
+          </div>
+          <div class="sheet-body" id="sheet-body"></div>
+        </div>
+
     </div>
-
-    <aside class="panel panel-print" aria-label="Ajustes de la cianotipia">
-      <div class="panel-head">
-        <h2>Cianotipia</h2>
-        <p class="panel-sub">Lo que va a salir</p>
-      </div>
-      <div class="panel-body" id="controls-print"></div>
-    </aside>
   </section>
 
   <!-- ============================ CALIBRAR ============================ -->
@@ -517,9 +888,9 @@ kbd {
               <select class="select" id="in-calsteps">
                 <option value="21">21 · se lee a ojo</option>
                 <option value="51">51 · foto con buena luz</option>
-                <option value="101">101 · sólo escaneada</option>
+                <option value="101">101 · foto buena o escáner</option>
               </select>
-              <p class="ctl-hint">Con 21 sobra para empezar. Las tablas de 101-256 pasos son las de Easy Digital Negatives: más finas, y piden que la tira llene el encuadre o un escáner.</p>
+              <p class="ctl-hint">21 sobra para empezar. Easy Digital Negatives ofrece 101 y 256 parches y recomienda 256: más finos, y piden escáner o que la tira llene el encuadre. La app se queda en 101 porque por encima de eso el límite ya no es la tabla, es la cámara con la que fotografías la copia.</p>
             </div>
             <div class="step-actions">
               <button class="btn btn-primary" id="btn-cal-sheet">Abrir la carta</button>
@@ -581,13 +952,20 @@ kbd {
           <h2>El negativo, a tamaño exacto</h2>
           <p class="lede">Se genera a la resolución que pidas y con el tamaño físico en milímetros. Nada de «ajustar a la página»: si la escala se va un 3 %, la copia no coincide nunca.</p>
         </header>
-        <div class="panel-body panel-body-flat" id="controls-out"></div>
+        <figure class="out-card">
+          <div class="out-shot"><canvas id="out-preview" width="10" height="10"></canvas></div>
+          <figcaption>
+            <p class="out-dims" id="out-hint">A4 · 210 × 297 mm</p>
+            <p class="out-sub" id="out-hint-2"></p>
+          </figcaption>
+        </figure>
         <div class="out-actions">
           <button class="btn btn-primary" id="btn-export">Guardar negativo (PNG)</button>
           <button class="btn btn-quiet" id="btn-print">Imprimir…</button>
           <button class="btn btn-quiet" id="btn-ruler">Probar escala</button>
         </div>
-        <p class="step-note" id="out-hint"></p>
+        <p class="step-note">Tamaño, resolución, margen y espejo se ajustan en <button class="linkbtn" id="btn-goto-salida">Salida</button>, dentro de Revelar. Aquí sólo se genera el archivo.</p>
+        <ul class="checklist" id="out-check"></ul>
       </div>
 
       <div class="col">
@@ -598,11 +976,12 @@ kbd {
           <h3 class="mt">Orden de trabajo</h3>
           <ol class="recipe-steps">
             <li>Imprime el negativo sobre film. Deja secar una hora antes de tocarlo: la tinta fresca se corre.</li>
-            <li>Sensibiliza el papel en penumbra y sécalo a oscuras. Mezcla A+B justo antes: aguanta 2-4 h.</li>
+            <li>Sensibiliza el papel en penumbra y sécalo a oscuras. Con el kit Jacquard, A y B a partes iguales y mézclalas justo antes: la mezcla de trabajo aguanta 2-4 h.</li>
             <li>Coloca el negativo con la tinta <strong>contra</strong> el papel y expón. Clásica 3-8 min al sol (2-4 min lámpara UV 365); kit Jacquard 10-20 min. Pasarse es mejor que quedarse corto: si sale velado baja el tiempo a la mitad, si sale corto duplícalo.</li>
             <li>Revela en agua corriente 5 min hasta que salga limpia. Una gota de agua oxigenada lo azula al instante; si no, sube solo en 24 h.</li>
             <li>Para virar: blanquea en carbonato sódico (1-2 cucharaditas por litro, menos de 5 min) hasta amarillo dorado, aclara y baña en ácido tánico al 2 % o té de 2 a 24 h.</li>
           </ol>
+          <p class="recipe-fine">Las cifras de densidad del soporte y de bloqueo por tinta son mediciones propias sobre la ET-2865, no de Jacquard ni de Easy Digital Negatives. Ver <code>research/</code>.</p>
         </div>
       </div>
     </div>
@@ -1118,12 +1497,14 @@ kbd {
     clasica: {
       name: 'Clásica (Herschel)', short: 'Clásica',
       range: 1.15, k: 1.25, toe: 0.06, shoulder: 0.12, printDmax: 1.32,
-      note: 'Citrato férrico amónico 20 % + ferricianuro potásico 8 %, 1:1. Pierde casi la mitad de la escala tonal en el lavado.'
+      note: 'Citrato férrico amónico 20 % + ferricianuro potásico 8 %, a partes iguales: la fórmula tradicional más citada. Pierde casi la mitad de la escala tonal en el lavado.'
     },
     jacquard: {
       name: 'Kit Jacquard (A+B)', short: 'Jacquard',
-      range: 1.05, k: 1.28, toe: 0.06, shoulder: 0.13, printDmax: 1.12,
-      note: 'Las dos partes del kit: A 40 g/400 ml + B 100 g/400 ml, 1:1 → 5 % ferricianuro y 12,5 % citrato, un 62 % de la clásica. La mezcla aguanta 2-4 h: se hace justo antes.'
+      // rango heredado de la clásica: es la misma química, sólo más diluida.
+      // Jacquard no publica densidades, sólo criterios cualitativos.
+      range: 1.15, k: 1.28, toe: 0.06, shoulder: 0.13, printDmax: 1.12,
+      note: 'Las dos partes del kit: A 40 g de ferricianuro en 400 ml y B 100 g de citrato en 400 ml, 1:1 → 5 % y 12,5 %, el 62 % de la clásica de 20 %/8 % y la mitad de la de Ware (25 g + 10 g por 100 ml). Menos hierro en el papel, algo menos de azul máximo. La mezcla aguanta 2-4 h: se hace justo antes.'
     },
     ware: {
       name: 'Nueva cianotipia (Ware)', short: 'Ware',
@@ -1318,6 +1699,643 @@ kbd {
   }
 
   P.engine = { build: build, SUPPORT: SUPPORT, INK: INK };
+})(typeof window !== 'undefined' ? (window.P = window.P || {}) : (module.exports = {}));
+
+/* Prusia — develop.js
+ * El revelado digital: enfoque, desenfoque de lente y efectos.
+ *
+ * Todo lo de aquí ocurre ANTES de la conversión a negativo. Es decir: esto
+ * decide qué foto entra en la cadena; engine.js decide qué tinta la imprime.
+ * Por eso el enfoque se mide en luz lineal (escalar la luma y repartir el
+ * factor entre los canales) y no en sRGB: en sRGB, aclarar un borde cambia
+ * el color, y en un negativo cualquier cambio de color es un cambio de
+ * densidad UV.
+ *
+ * Los radios NO se guardan en píxeles sino en fracción del ancho de imagen.
+ * Así el preview a 900 px y la exportación a 2976 px dan lo mismo sin que
+ * nadie tenga que reescalar nada a mano.
+ *
+ * Sin dependencias: convolución separable por sumas acumuladas (3 pasadas de
+ * caja = gaussiana de sobra para un preview), todo en Float32.
+ */
+(function (P) {
+  'use strict';
+
+  const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+  const smoothstep = (a, b, x) => {
+    const t = clamp01((x - a) / (b - a || 1e-6));
+    return t * t * (3 - 2 * t);
+  };
+
+  /* ------------------------------------------------------------ parámetros */
+  /* Un único objeto plano: es lo que se guarda, se compara y se mezcla. */
+  function defaults() {
+    return {
+      // Enfoque
+      sharp: 0,        // 0..100 nitidez (radio pequeño)
+      radius: 0.0016,  // radio del halo de nitidez, fracción del ancho
+      threshold: 6,    // 0..40 umbral de ruido (0-255)
+      structure: 0,    // 0..100 contraste local de detalle medio
+      clarity: 0,      // 0..100 contraste local de detalle grande
+      // Desenfoque de lente (profundidad de campo)
+      lens: 0,         // 0..100
+      lensTrans: 0.45, // 0..1 suavidad del borde del foco
+      lensY: 0.5,      // centro del foco (0..1 del alto)
+      lensSize: 0.42,  // radio del foco, fracción del alto
+      lensBokeh: 0,    // 0..100 estallido de las luces desenfocadas
+      // Efectos
+      grain: 0,        // 0..100
+      grainSize: 1,    // 0.4..3
+      vignette: 0,     // -100..100 (negativo = esquinas más claras)
+      vignetteMid: 50, // 0..100 tamaño del círculo limpio
+      glow: 0,         // 0..100
+      glowWarm: 0,     // -100..100
+      tonal: 0,        // -100..100 contraste por bandas (global)
+      shadows: 0,      // -100..100
+      mids: 0,         // -100..100
+      highs: 0,        // -100..100
+      textura: 0,      // 0..100 irregularidad de la emulsión
+      texturaTipo: 'pincel'
+    };
+  }
+
+  const KEYS = Object.keys(defaults());
+  const NEUTRAL = defaults();
+
+  /** ¿hay algo que hacer? si no, la cadena no toca un solo píxel. */
+  function isNeutral(p) {
+    if (!p) return true;
+    for (let i = 0; i < KEYS.length; i++) {
+      const k = KEYS[i];
+      if (k === 'radius' || k === 'lensTrans' || k === 'lensY' || k === 'lensSize' ||
+        k === 'grainSize' || k === 'vignetteMid' || k === 'texturaTipo') continue;
+      if (Math.abs((p[k] == null ? 0 : p[k]) - (NEUTRAL[k] == null ? 0 : NEUTRAL[k])) > 1e-6) return false;
+    }
+    return true;
+  }
+
+  /** lo que de verdad hace falta calcular, en orden de coste creciente */
+  function needs(p) {
+    if (!p) return {};
+    const a = (v) => (v || 0);
+    return {
+      focus: a(p.sharp) > 0 || a(p.structure) > 0 || a(p.clarity) > 0,
+      lens: a(p.lens) > 0,
+      grain: a(p.grain) > 0,
+      vignette: a(p.vignette) !== 0,
+      glow: a(p.glow) > 0,
+      tonal: a(p.tonal) !== 0 || a(p.shadows) !== 0 || a(p.mids) !== 0 || a(p.highs) !== 0,
+      textura: a(p.textura) > 0
+    };
+  }
+
+  /* -------------------------------------------------------- planos de trabajo */
+  /* Un solo buffer por tamaño: la luma y sus desenfoques se pisan entre sí
+     porque cada operación termina leyendo lo que la anterior escribió. */
+  let W = 0, H = 0;
+  let lum = null, tmp = null, tmp2 = null, mask = null;
+
+  function alloc(w, h) {
+    if (w === W && h === H && lum) return;
+    W = w; H = h;
+    const n = w * h;
+    lum = new Float32Array(n);
+    tmp = new Float32Array(n);
+    tmp2 = new Float32Array(n);
+    mask = new Float32Array(n);
+  }
+
+  /* --------------------------------------------------------- caja separable */
+  /* Una pasada de caja con sumas acumuladas: O(n), independiente del radio. */
+  function boxH(src, dst, w, h, r) {
+    if (r < 1) { dst.set(src); return; }
+    const inv = 1 / (r * 2 + 1);
+    for (let y = 0; y < h; y++) {
+      const row = y * w;
+      let acc = 0;
+      // arranque: borde replicado
+      for (let i = -r; i <= r; i++) acc += src[row + (i < 0 ? 0 : i > w - 1 ? w - 1 : i)];
+      for (let x = 0; x < w; x++) {
+        dst[row + x] = acc * inv;
+        const out = x - r < 0 ? 0 : x - r;
+        const inn = x + r + 1 > w - 1 ? w - 1 : x + r + 1;
+        acc += src[row + inn] - src[row + out];
+      }
+    }
+  }
+  function boxV(src, dst, w, h, r) {
+    if (r < 1) { dst.set(src); return; }
+    const inv = 1 / (r * 2 + 1);
+    for (let x = 0; x < w; x++) {
+      let acc = 0;
+      for (let i = -r; i <= r; i++) acc += src[(i < 0 ? 0 : i > h - 1 ? h - 1 : i) * w + x];
+      for (let y = 0; y < h; y++) {
+        dst[y * w + x] = acc * inv;
+        const out = y - r < 0 ? 0 : y - r;
+        const inn = y + r + 1 > h - 1 ? h - 1 : y + r + 1;
+        acc += src[inn * w + x] - src[out * w + x];
+      }
+    }
+  }
+  /* Tres cajas ≈ gaussiana; el radio de caja necesario sale de la desviación
+     que se quiere (ver Getreuer 2012, «A survey of Gaussian convolution
+     algorithms»): r ≈ sqrt(12σ²/3 + 1)/2. */
+  function blur(src, dst, w, h, sigma) {
+    if (!sigma || sigma < 0.35) { dst.set(src); return; }
+    const r = Math.max(1, Math.round((Math.sqrt(4 * sigma * sigma + 1) - 1) / 2));
+    boxH(src, tmp2, w, h, r);
+    boxV(tmp2, dst, w, h, r);
+  }
+
+  /* ------------------------------------------------------------- luma / luz */
+  const LIN = new Float32Array(256);
+  for (let i = 0; i < 256; i++) {
+    const v = i / 255;
+    LIN[i] = v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  }
+  const toSrgb = (v) => {
+    v = clamp01(v);
+    return v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055;
+  };
+
+  /* --------------------------------------------------------------- enfoque */
+  function applyFocus(d, w, h, p) {
+    const n = w * h;
+    const amp = (p.sharp || 0) / 100;
+    const str = (p.structure || 0) / 100;
+    const cla = (p.clarity || 0) / 100;
+    if (!amp && !str && !cla) return;
+
+    // luma lineal normalizada a 1 (el desenfoque tiene que ver con la luz)
+    for (let i = 0; i < n; i++) {
+      const q = i << 2;
+      lum[i] = 0.2126 * LIN[d[q]] + 0.7152 * LIN[d[q + 1]] + 0.0722 * LIN[d[q + 2]];
+    }
+
+    const thr = (p.threshold || 0) / 255;
+    /* Acumula un alta frecuencia sobre lum. `radiusFrac` en fracción del ancho;
+       `lo`/`hi` recortan la banda de luminancia en la que actúa (claridad).
+       `knee` es relativo al nivel local: el tope de realce es una fracción de
+       la luz que ya hay ahí, así un borde entre dos grises admite el mismo
+       relieve que uno entre blanco y negro sin reventar a ninguno de los dos. */
+    function hf(radiusFrac, amount, kneeRel, lo, hi) {
+      const sigma = Math.max(0.4, radiusFrac * w);
+      blur(lum, tmp, w, h, sigma);
+      for (let i = 0; i < n; i++) {
+        const base = lum[i];
+        let dlt = base - tmp[i];
+        const a = dlt < 0 ? -dlt : dlt;
+        // umbral: por debajo del ruido no se toca nada (no amplifica grano)
+        if (thr > 0) {
+          if (a <= thr) continue;
+          dlt = dlt > 0 ? a - thr : -(a - thr);
+        }
+        if (lo != null) {
+          // peso por banda: fuera de [lo,hi] el efecto cae a cero
+          const wgt = smoothstep(lo, lo + 0.12, base) * (1 - smoothstep(hi - 0.12, hi, base));
+          if (wgt <= 0.001) continue;
+          dlt *= wgt;
+        }
+        // rodilla suave: el realce no puede pasar de una fracción del nivel local
+        const k = Math.max(0.004, kneeRel * (tmp[i] + 0.006));
+        const ax = dlt < 0 ? -dlt : dlt;
+        if (ax > k) dlt = (dlt > 0 ? 1 : -1) * (k + k * Math.tanh((ax - k) / k));
+        lum[i] = base + dlt * amount;
+      }
+    }
+
+    /* Orden deliberado: claridad (radio grande) → estructura → nitidez.
+       Al revés, la nitidez se comería los halos que crea la claridad. */
+    if (cla) hf(0.055, cla * 0.9, 0.85, 0.02, 0.92);
+    if (str) hf(0.011, str * 1.35, 0.7, 0.01, 0.96);
+    if (amp) hf(p.radius || 0.0016, amp * 1.8, 0.6, null, null);
+
+    // vuelta a RGB por factor, sin tocar el color
+    for (let i = 0; i < n; i++) {
+      const q = i << 2;
+      const base = 0.2126 * LIN[d[q]] + 0.7152 * LIN[d[q + 1]] + 0.0722 * LIN[d[q + 2]];
+      if (base < 1e-5) continue;
+      const f = lum[i] / base;
+      if (!isFinite(f) || f <= 0) continue;
+      d[q] = toSrgb(LIN[d[q]] * f) * 255;
+      d[q + 1] = toSrgb(LIN[d[q + 1]] * f) * 255;
+      d[q + 2] = toSrgb(LIN[d[q + 2]] * f) * 255;
+    }
+  }
+
+  /* ------------------------------------------------- desenfoque de lente */
+  /* Un foco elíptico desplazable: dentro, la imagen tal cual; fuera, desenfoque
+     con un borde suave. Las luces del fondo se «abren» un poco antes de
+     desenfocarse (bokeh), que es lo que distingue un desenfoque de lente de
+     un simple desenfoque gaussiano. */
+  function applyLens(d, w, h, p) {
+    const amount = (p.lens || 0) / 100;
+    if (amount <= 0) return;
+    const n = w * h;
+    const sigma = Math.pow(amount, 1.35) * 0.028 * w;
+
+    for (let i = 0; i < n; i++) {
+      const q = i << 2;
+      lum[i] = 0.2126 * LIN[d[q]] + 0.7152 * LIN[d[q + 1]] + 0.0722 * LIN[d[q + 2]];
+    }
+
+    // bokeh: comprime las luces antes de desenfocar para que ganen cuerpo
+    const bokeh = (p.lensBokeh || 0) / 100;
+    if (bokeh > 0) {
+      const g = 1 + bokeh * 1.6;
+      for (let i = 0; i < n; i++) tmp[i] = Math.pow(lum[i], 1 / g);
+    } else {
+      tmp.set(lum);
+    }
+    blur(tmp, tmp2, w, h, sigma);
+    if (bokeh > 0) {
+      const g = 1 + bokeh * 1.6;
+      for (let i = 0; i < n; i++) tmp2[i] = Math.pow(clamp01(tmp2[i]), g);
+    }
+
+    // máscara del foco: 0 = nítido dentro, 1 = desenfocado fuera
+    const cy = (p.lensY == null ? 0.5 : p.lensY) * h;
+    const rx = Math.max(0.06, (p.lensSize == null ? 0.42 : p.lensSize) * h * 1.55);
+    const ry = Math.max(0.06, (p.lensSize == null ? 0.42 : p.lensSize) * h);
+    const t = Math.max(0.04, (p.lensTrans == null ? 0.45 : p.lensTrans)) * 0.9;
+    const cx = w * 0.5;
+    for (let y = 0; y < h; y++) {
+      const dy = (y - cy) / ry;
+      for (let x = 0; x < w; x++) {
+        const dx = (x - cx) / rx;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        mask[y * w + x] = smoothstep(1 - t, 1 + t, dist);
+      }
+    }
+
+    for (let i = 0; i < n; i++) {
+      const m = mask[i];
+      if (m <= 0.0005) continue;
+      const base = lum[i];
+      const blurred = tmp2[i];
+      const target = base + (blurred - base) * m;
+      const q = i << 2;
+      if (base < 1e-5) {
+        d[q] = toSrgb(target) * 255;
+        d[q + 1] = toSrgb(target) * 255;
+        d[q + 2] = toSrgb(target) * 255;
+        continue;
+      }
+      const f = target / base;
+      d[q] = toSrgb(LIN[d[q]] * f) * 255;
+      d[q + 1] = toSrgb(LIN[d[q + 1]] * f) * 255;
+      d[q + 2] = toSrgb(LIN[d[q + 2]] * f) * 255;
+    }
+  }
+
+  /* --------------------------------------------------------------- efectos */
+  /* Ruido de valor reproducible: la misma foto da el mismo grano siempre.
+     Semilla fija para que exportar no cambie la imagen respecto al preview. */
+  function makeNoise(size, seed) {
+    const n = size * size;
+    const out = new Float32Array(n);
+    let s = seed >>> 0;
+    const rnd = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
+    for (let i = 0; i < n; i++) out[i] = rnd();
+    return out;
+  }
+  const noiseCache = {};
+  function noiseFor(cell, seed) {
+    const key = cell + ':' + seed;
+    if (noiseCache[key]) return noiseCache[key];
+    const size = 128;
+    const base = makeNoise(size, seed);
+    const out = new Float32Array(size * size);
+    // dos octavas de ruido de valor con paso `cell`
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        let v = 0, wsum = 0;
+        for (let o = 0; o < 2; o++) {
+          const step = Math.max(1, Math.round(cell * (o ? 1 : 2.6)));
+          const xf = x / step, yf = y / step;
+          const x0 = Math.floor(xf), y0 = Math.floor(yf);
+          const fx = xf - x0, fy = yf - y0;
+          const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+          const at = (px, py) => base[((py % size + size) % size) * size + ((px % size + size) % size)];
+          const v0 = at(x0, y0) * (1 - sx) + at(x0 + 1, y0) * sx;
+          const v1 = at(x0, y0 + 1) * (1 - sx) + at(x0 + 1, y0 + 1) * sx;
+          const wgt = o ? 0.45 : 1;
+          v += (v0 * (1 - sy) + v1 * sy) * wgt;
+          wsum += wgt;
+        }
+        out[y * size + x] = v / wsum; // 0..1
+      }
+    }
+    noiseCache[key] = { data: out, size: size };
+    return noiseCache[key];
+  }
+
+  function applyGrain(d, w, h, p) {
+    const amt = (p.grain || 0) / 100;
+    if (amt <= 0) return;
+    const cell = Math.max(1, Math.round(1.6 * (p.grainSize || 1)));
+    const nz = noiseFor(cell, 0x5eed);
+    const N = nz.size;
+    const amp = amt * 0.055;
+    for (let y = 0; y < h; y++) {
+      const row = (y & (N - 1)) * N;
+      for (let x = 0; x < w; x++) {
+        const n = nz.data[row + (x & (N - 1))] - 0.5;
+        // el grano muerde en medios y sombras, no en el blanco del papel
+        const i = y * w + x;
+        const q = i << 2;
+        const y0 = 0.2126 * LIN[d[q]] + 0.7152 * LIN[d[q + 1]] + 0.0722 * LIN[d[q + 2]];
+        const weight = Math.sqrt(y0) * (1 - 0.45 * y0);
+        const f = 1 + n * amp * 2 * weight;
+        if (f === 1) continue;
+        d[q] = toSrgb(LIN[d[q]] * f) * 255;
+        d[q + 1] = toSrgb(LIN[d[q + 1]] * f) * 255;
+        d[q + 2] = toSrgb(LIN[d[q + 2]] * f) * 255;
+      }
+    }
+  }
+
+  function applyVignette(d, w, h, p) {
+    const amt = (p.vignette || 0) / 100;
+    if (amt === 0) return;
+    const mid = (p.vignetteMid == null ? 50 : p.vignetteMid) / 100;
+    const cx = w / 2, cy = h / 2;
+    const rmax = Math.sqrt(cx * cx + cy * cy);
+    const inner = 0.25 + mid * 0.95;
+    for (let y = 0; y < h; y++) {
+      const dy = (y - cy) / rmax;
+      for (let x = 0; x < w; x++) {
+        const dx = (x - cx) / rmax;
+        // elipse suavizada: en un negativo 4:3 el círculo puro recorta de más
+        const dist = Math.sqrt(dx * dx * 0.82 + dy * dy * 1.12) * 1.35;
+        const t = smoothstep(inner, 1.15, dist);
+        if (t <= 0) continue;
+        const f = 1 - t * amt * 0.92;
+        if (f <= 0.02) continue;
+        const i = y * w + x;
+        const q = i << 2;
+        d[q] = toSrgb(LIN[d[q]] * f) * 255;
+        d[q + 1] = toSrgb(LIN[d[q + 1]] * f) * 255;
+        d[q + 2] = toSrgb(LIN[d[q + 2]] * f) * 255;
+      }
+    }
+  }
+
+  function applyGlow(d, w, h, p) {
+    const amt = (p.glow || 0) / 100;
+    if (amt <= 0) return;
+    const warm = (p.glowWarm || 0) / 100;
+    const n = w * h;
+    for (let i = 0; i < n; i++) {
+      const q = i << 2;
+      lum[i] = 0.2126 * LIN[d[q]] + 0.7152 * LIN[d[q + 1]] + 0.0722 * LIN[d[q + 2]];
+    }
+    blur(lum, tmp, w, h, Math.max(0.8, 0.014 * w));
+    for (let i = 0; i < n; i++) {
+      const q = i << 2;
+      const base = 0.2126 * LIN[d[q]] + 0.7152 * LIN[d[q + 1]] + 0.0722 * LIN[d[q + 2]];
+      if (base < 1e-5) continue;
+      // «screen»: ilumina sin velar del todo, como una difusión óptica.
+      // Se mezcla en luma y se aplica como FACTOR: f es un cociente, no un valor.
+      const scr = 1 - (1 - clamp01(base)) * (1 - clamp01(tmp[i]) * 0.85);
+      const f = 1 + ((scr - base) / base) * amt;
+      if (!isFinite(f) || f <= 0) continue;
+      let r = LIN[d[q]] * f, g = LIN[d[q + 1]] * f, b = LIN[d[q + 2]] * f;
+      if (warm) {
+        r *= 1 + warm * 0.18;
+        b *= 1 - warm * 0.16;
+      }
+      d[q] = toSrgb(r) * 255;
+      d[q + 1] = toSrgb(g) * 255;
+      d[q + 2] = toSrgb(b) * 255;
+    }
+  }
+
+  /* Contraste por bandas: es el viejo truco del positivado enmascarado, pero
+     por separado en sombras, medios y luces. En cianotipo es exactamente lo
+     que se hace con dos exposiciones. */
+  function toneBand(v, amount) {
+    if (!amount) return v;
+    const s = Math.tanh(v * 2.4) / Math.tanh(2.4);
+    return clamp01(v + (s - v) * amount);
+  }
+
+  function applyTonal(d, w, h, p) {
+    const g = (p.tonal || 0) / 100;
+    const vs = (p.shadows || 0) / 100;
+    const vm = (p.mids || 0) / 100;
+    const vh = (p.highs || 0) / 100;
+    if (!g && !vs && !vm && !vh) return;
+    // densidad de banda por luminancia lineal
+    const band = (y0) => {
+      const sh = 1 - smoothstep(0.02, 0.16, y0);
+      const hi = smoothstep(0.34, 0.78, y0);
+      const mid = Math.max(0, 1 - sh - hi);
+      return sh * vs + mid * vm + hi * vh;
+    };
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const i = y * w + x;
+        const q = i << 2;
+        // el contraste tonal trabaja en sRGB (es donde el ojo ve el contraste)
+        let r = d[q] / 255, gg = d[q + 1] / 255, b = d[q + 2] / 255;
+        const y0 = 0.2126 * LIN[d[q]] + 0.7152 * LIN[d[q + 1]] + 0.0722 * LIN[d[q + 2]];
+        const k = band(y0) + g * 0.6;
+        if (Math.abs(k) < 0.002) continue;
+        const ysrgb = 0.2126 * r + 0.7152 * gg + 0.0722 * b;
+        const ny = toneBand(ysrgb, k);
+        const f = ysrgb > 1e-4 ? ny / ysrgb : 1;
+        d[q] = clamp01(r * f) * 255;
+        d[q + 1] = clamp01(gg * f) * 255;
+        d[q + 2] = clamp01(b * f) * 255;
+      }
+    }
+  }
+
+  /* Emulsión irregular: una cianotipia nunca se revela igual en toda la hoja.
+     Esto mete esa falta de uniformidad en la imagen, no en el papel, así que
+     viaja con el negativo y se imprime de verdad. */
+  function applyTextura(d, w, h, p) {
+    const amt = (p.textura || 0) / 100;
+    if (amt <= 0) return;
+    const tipo = p.texturaTipo || 'pincel';
+    const cell = tipo === 'fibra' ? 2 : tipo === 'mancha' ? 9 : 4;
+    const nz = noiseFor(cell, tipo === 'fibra' ? 0x11c : tipo === 'mancha' ? 0x77 : 0x3ab);
+    const N = nz.size;
+    // el pincel va en horizontal: estira el ruido en X para que parezca pasada
+    const stretch = tipo === 'pincel' ? 3 : 1;
+    const scale = Math.max(0.35, 0.9 * (N / 128) * (tipo === 'mancha' ? 3 : 1));
+    const amp = amt * 0.16;
+    for (let y = 0; y < h; y++) {
+      const sy = ((y / scale) | 0) & (N - 1);
+      const row = sy * N;
+      for (let x = 0; x < w; x++) {
+        const sx = (((x / (scale * stretch)) | 0)) & (N - 1);
+        const n = nz.data[row + sx] - 0.5;
+        const i = y * w + x;
+        const q = i << 2;
+        const f = 1 + n * amp * 2;
+        d[q] = toSrgb(LIN[d[q]] * f) * 255;
+        d[q + 1] = toSrgb(LIN[d[q + 1]] * f) * 255;
+        d[q + 2] = toSrgb(LIN[d[q + 2]] * f) * 255;
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------- la cadena */
+  /* Orden: enfoque → desenfoque de lente → textura → contraste tonal →
+     viñeta → brillo → grano. El grano va al final para no comerse el detalle
+     recién creado, y la viñeta antes del grano para no amplificar el ruido de
+     las esquinas. */
+  function apply(data, w, h, p) {
+    if (!p || isNeutral(p)) return data;
+    alloc(w, h);
+    const q = needs(p);
+    if (q.focus) applyFocus(data, w, h, p);
+    if (q.lens) applyLens(data, w, h, p);
+    if (q.textura) applyTextura(data, w, h, p);
+    if (q.tonal) applyTonal(data, w, h, p);
+    if (q.vignette) applyVignette(data, w, h, p);
+    if (q.glow) applyGlow(data, w, h, p);
+    if (q.grain) applyGrain(data, w, h, p);
+    return data;
+  }
+
+  /** Procesa un canvas/bitmap entero y devuelve otro canvas. */
+  function processCanvas(src, w, h, p) {
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w));
+    c.height = Math.max(1, Math.round(h));
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(src, 0, 0, c.width, c.height);
+    if (!p || isNeutral(p)) return c;
+    const img = g.getImageData(0, 0, c.width, c.height);
+    apply(img.data, c.width, c.height, p);
+    g.putImageData(img, 0, 0);
+    return c;
+  }
+
+  /* --------------------------------------------------------------- estilos */
+  /* Un estilo no es un filtro: es un juego de números del revelado. La
+     intensidad lo mezcla con el neutro, así nunca hay saltos. */
+  function blend(base, over, strength) {
+    const out = {};
+    for (let i = 0; i < KEYS.length; i++) {
+      const k = KEYS[i];
+      const a = base[k] == null ? 0 : base[k];
+      const b = over[k] == null ? a : over[k];
+      out[k] = typeof a === 'number' ? a + (b - a) * strength : (strength > 0.5 ? b : a);
+    }
+    return out;
+  }
+
+  P.develop = {
+    DEFAULTS: NEUTRAL, defaults: defaults, isNeutral: isNeutral, needs: needs,
+    apply: apply, processCanvas: processCanvas, blend: blend,
+    toSrgb: toSrgb
+  };
+})(typeof window !== 'undefined' ? (window.P = window.P || {}) : (module.exports = {}));
+
+/* Prusia — looks.js
+ * Estilos de revelado.
+ *
+ * Un estilo no es un filtro de color: es un juego de números del revelado
+ * (enfoque, desenfoque, grano, viñeta, emulsión). La miniatura que se ve en la
+ * bandeja se calcula de verdad —se revela un recorte de TU foto y se pasa por
+ * la química que tengas elegida—, así que lo que eliges es lo que sale.
+ */
+(function (P) {
+  'use strict';
+
+  /* params: sólo lo que el estilo toca. El resto se queda neutro. */
+  const LIST = [
+    {
+      id: 'ninguno', name: 'Sin estilo', tag: 'neutral',
+      note: 'La foto entra en la cadena tal cual. Es el punto de partida honesto: si el negativo sale mal, el problema está en otra parte.',
+      params: {}
+    },
+    {
+      id: 'botanica', name: 'Botánica', tag: 'detalle',
+      note: 'Estructura alta y grano mínimo. Para hoja, flor, tallo: lo que en cianotipo se lee por el borde de la silueta.',
+      params: { sharp: 34, structure: 46, clarity: 16, threshold: 4, grain: 6, textura: 5 }
+    },
+    {
+      id: 'retrato', name: 'Retrato azul', tag: 'piel',
+      note: 'Poco enfoque y un velo suave: el cianotipo no perdona la piel dura, y el azul ya la endurece de por sí.',
+      params: { sharp: 12, threshold: 14, glow: 22, glowWarm: 12, vignette: 16, grain: 5, shadows: 10 }
+    },
+    {
+      id: 'arquitectura', name: 'Arquitectura', tag: 'líneas',
+      note: 'Aristas limpias y contraste local alto, sin grano: el dibujo de una fachada se sostiene en las verticales.',
+      params: { sharp: 48, structure: 52, clarity: 24, threshold: 3, vignette: 8 }
+    },
+    {
+      id: 'antiguo', name: 'Cianotipo antiguo', tag: 'archivo',
+      note: 'Emulsión irregular, grano grueso y esquinas caídas. Lo que hace una copia de 1890 mal lavada, pero a propósito.',
+      params: { grain: 30, grainSize: 1.7, textura: 28, texturaTipo: 'pincel', vignette: 26, clarity: 12, sharp: 14, shadows: 12 }
+    },
+    {
+      id: 'platino', name: 'Platino', tag: 'largo',
+      note: 'Escala larga y luz difusa, como una copia al platino. La zona media se abre y el azul no se cierra.',
+      params: { glow: 28, glowWarm: -8, clarity: 16, sharp: 18, threshold: 10, tonal: -14, vignette: 10 }
+    },
+    {
+      id: 'dosbanos', name: 'Dos baños', tag: 'contraste',
+      note: 'Sombras abajo, luces arriba: el efecto de revelar con dos exposiciones y enmascarar. Para un negativo flojo.',
+      params: { tonal: 26, shadows: -20, highs: 14, clarity: 22, sharp: 16, threshold: 8 }
+    },
+    {
+      id: 'veladura', name: 'Veladura', tag: 'niebla',
+      note: 'Un velo de luz sobre toda la copia, esquinas más claras. El error clásico de revelado, convertido en intención.',
+      params: { glow: 34, glowWarm: -6, vignette: -16, grain: 9, sharp: 8 }
+    }
+  ];
+
+  const byId = {};
+  LIST.forEach((l) => { byId[l.id] = l; });
+
+  /** parámetros completos de un estilo a una intensidad dada (0..1) */
+  function paramsFor(id, strength) {
+    const look = byId[id];
+    const base = P.develop.defaults();
+    if (!look || id === 'ninguno') return base;
+    const s = strength == null ? 1 : Math.max(0, Math.min(1, strength));
+    return P.develop.blend(base, Object.assign({}, base, look.params), s);
+  }
+
+  /* Miniatura real: recorte de la foto → revelado del estilo → química.
+     Reutiliza el mapa de tono del motor para que el color sea el de verdad. */
+  function thumb(src, params, eng, size) {
+    const c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    const iw = src.naturalWidth || src.width, ih = src.naturalHeight || src.height;
+    const side = Math.min(iw, ih);
+    const sx = (iw - side) / 2, sy = (ih - side) / 2;
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(src, sx, sy, side, side, 0, 0, size, size);
+
+    const data = g.getImageData(0, 0, size, size);
+    P.develop.apply(data.data, size, size, params);
+    g.putImageData(data, 0, 0);
+
+    if (!eng) return c;
+    const px = data.data;
+    const mapY = eng.mapY;
+    const LIN = P.render.LIN;
+    const out = new Uint32Array(px.buffer, 0, size * size);
+    for (let i = 0; i < size * size; i++) {
+      const p = i << 2;
+      const Y = 0.2126 * LIN[px[p]] + 0.7152 * LIN[px[p + 1]] + 0.0722 * LIN[px[p + 2]];
+      const k = ((Math.sqrt(Y > 0 ? Y : 0) * 4095) | 0) * 3;
+      out[i] = 0xff000000 | (mapY[k + 2] << 16) | (mapY[k + 1] << 8) | mapY[k];
+    }
+    g.putImageData(data, 0, 0);
+    return c;
+  }
+
+  P.looks = { LIST: LIST, byId: byId, paramsFor: paramsFor, thumb: thumb };
 })(typeof window !== 'undefined' ? (window.P = window.P || {}) : (module.exports = {}));
 
 /* Prusia — calibrate.js
@@ -1808,12 +2826,14 @@ kbd {
 
   /* ---------- preview ---------- */
   /* Dibuja el papel completo con su margen y, dentro, la imagen procesada.
-     opt: { eng, img, mode, w, h, fit, zoom, texture, mix, margin(mm), paperBox } */
+     opt: { eng, img, mode, w, h, fit, zoom, texture, mix, margin, develop,
+            devKey, quality, cache } */
   function drawPreview(canvas, opt) {
     const eng = opt.eng;
     if (!eng || !opt.img) return;
     const img = opt.img;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const q = opt.quality == null ? 1 : Math.max(0.3, Math.min(1, opt.quality));
+    const dpr = Math.min(2, (window.devicePixelRatio || 1)) * q;
     const cw = Math.max(40, Math.round(opt.w));
     const ch = Math.max(40, Math.round(opt.h));
     const W = Math.max(48, Math.round(cw * dpr));
@@ -1836,7 +2856,28 @@ kbd {
     const ix = padX, iy = padY, iw = Math.max(8, W - padX * 2), ih = Math.max(8, H - padY * 2);
     const src = makeSourceCanvas(img, iw, ih, opt.fit, 0, 0, opt.zoom);
     const sg = src.getContext('2d', { willReadFrequently: true });
-    const data = sg.getImageData(0, 0, iw, ih);
+
+    /* revelado (enfoque, desenfoque, efectos): se aplica sobre los píxeles ya
+       colocados en el papel, así el radio se mide siempre en píxeles de salida.
+       Se cachea por parámetros y tamaño: mover un mando de química no vuelve a
+       revelar lo que no ha cambiado. */
+    const cache = opt.cache;
+    const cacheKey = opt.devKey
+      ? opt.devKey + '|' + iw + 'x' + ih + '|' + opt.fit + '|' + (opt.zoom || 1) + '|' + q
+      : null;
+    let data;
+    if (cache && cacheKey && cache.key === cacheKey && cache.data &&
+      cache.data.width === iw && cache.data.height === ih) {
+      data = cache.data;
+      sg.putImageData(data, 0, 0);
+    } else {
+      data = sg.getImageData(0, 0, iw, ih);
+      if (opt.develop && !P.develop.isNeutral(opt.develop)) {
+        P.develop.apply(data.data, iw, ih, opt.develop);
+        sg.putImageData(data, 0, 0);
+      }
+      if (cache && cacheKey) { cache.key = cacheKey; cache.data = data; }
+    }
     const px = data.data;
     const out = new Uint32Array(px.buffer, 0, iw * ih);
 
@@ -1918,6 +2959,10 @@ kbd {
     const src = makeSourceCanvas(img, Math.max(1, inW), Math.max(1, inH), opt.fit, 0, 0, opt.zoom || 1);
     const sg = src.getContext('2d', { willReadFrequently: true });
     const d = sg.getImageData(0, 0, src.width, src.height);
+    if (opt.develop && !P.develop.isNeutral(opt.develop)) {
+      P.develop.apply(d.data, src.width, src.height, opt.develop);
+      sg.putImageData(d, 0, 0);
+    }
     const px = d.data;
     const n = src.width * src.height;
     const out = new Uint32Array(px.buffer, 0, n);
@@ -2181,11 +3226,17 @@ kbd {
 })(typeof window !== 'undefined' ? (window.P = window.P || {}) : (module.exports = {}));
 
 /* Prusia — app.js
- * Estado, controles y todo lo que pasa cuando tocas algo.
+ * Estado, bandeja de herramientas y todo lo que pasa cuando tocas algo.
+ *
+ * La app es una sola superficie: la foto en medio y una bandeja de
+ * herramientas abajo. Abrir una herramienta hace crecer la bandeja hacia
+ * arriba; el último control tocado queda «armado» y responde al arrastre
+ * sobre la foto, como en Snapseed. Todo cambio entra en un historial que se
+ * deshace con ⌘Z.
  */
 (function (P) {
   'use strict';
-  const U = P.ui, el = U.el, S = P.sci, T = P.tone, E = P.engine, R = P.render;
+  const U = P.ui, el = U.el, S = P.sci, T = P.tone, E = P.engine, R = P.render, D = P.develop;
   const $ = (s) => document.querySelector(s);
   const num = (v, d) => Number(v).toFixed(d === undefined ? 2 : d).replace('.', ',');
 
@@ -2217,20 +3268,31 @@ kbd {
   state.view = 'revelar';
   state.mode = 'print';
   state.calib = null;
+  state.dev = D.defaults();
+  state.look = { id: 'ninguno', strength: 1 };
+  state.tool = null;
+  state.zoom = 1;
+  state.raw = false;
+
   let profiles = [];
   let img = null;
   let imgName = '';
   let engine = null;
   let pending = false;
-  let zoom = 1;
+  let fast = false;
+  let engHash = '';
+  let imgRev = 0;
 
   /* ------------------------------------------------------------ persistencia */
-  const KEY = 'prusia.state.v2';
+  const KEY = 'prusia.state.v3';
   const KEYP = 'prusia.profiles.v2';
 
   function save() {
     try {
-      localStorage.setItem(KEY, JSON.stringify({ neg: state.neg, proc: state.proc, out: state.out, cal: state.cal }));
+      localStorage.setItem(KEY, JSON.stringify({
+        neg: state.neg, proc: state.proc, out: state.out, cal: state.cal,
+        dev: state.dev, look: state.look
+      }));
       localStorage.setItem(KEYP, JSON.stringify(profiles));
     } catch (_e) { /* modo privado: seguimos sin guardar */ }
   }
@@ -2243,15 +3305,86 @@ kbd {
         if (o.proc) Object.assign(state.proc, o.proc);
         if (o.out) Object.assign(state.out, o.out);
         if (o.cal) Object.assign(state.cal, o.cal);
+        if (o.dev) Object.assign(state.dev, o.dev);
+        if (o.look) Object.assign(state.look, o.look);
       }
       const pr = localStorage.getItem(KEYP);
       if (pr) profiles = JSON.parse(pr);
     } catch (_e) { /* datos corruptos: arrancamos limpio */ }
   }
 
+  /* -------------------------------------------------------------- historial */
+  const SLICES = ['neg', 'proc', 'out', 'dev', 'look'];
+  let hist = [];
+  let histIdx = -1;
+
+  function snap() {
+    const o = {};
+    SLICES.forEach((k) => { o[k] = state[k]; });
+    return JSON.stringify(o);
+  }
+  function pushHistory(label, merge) {
+    const s = snap();
+    const now = Date.now();
+    const top = hist[histIdx];
+    if (top && top.s === s) return;
+    if (merge && top && top.label === label && now - top.t < 900) {
+      top.s = s; top.t = now;            // misma rueda: se refunde en una entrada
+    } else {
+      hist = hist.slice(0, histIdx + 1);
+      hist.push({ s: s, label: label, t: now });
+      if (hist.length > 80) hist.shift();
+      histIdx = hist.length - 1;
+    }
+    paintHistBtns();
+    if (!$('#stackpanel').hidden) paintStack();
+  }
+  function applySnap(s) {
+    const o = JSON.parse(s);
+    SLICES.forEach((k) => {
+      if (!o[k]) return;
+      if (typeof o[k] === 'object') {
+        Object.keys(state[k]).forEach((kk) => { delete state[k][kk]; });
+        Object.assign(state[k], o[k]);
+      } else state[k] = o[k];
+    });
+    engHash = '';
+    if (state.look && state.look.id === 'ninguno') {
+      // el estilo «sin estilo» implica revelado neutro
+      Object.assign(state.dev, D.defaults());
+    }
+    buildEngine();
+    rebuildSheet();
+    drawStage();
+    renderReadouts();
+    syncHints();
+    syncOut();
+    save();
+  }
+  function undo() {
+    if (histIdx <= 0) return;
+    histIdx--;
+    applySnap(hist[histIdx].s);
+    U.toast('Deshecho · ' + (hist[histIdx + 1] ? hist[histIdx + 1].label : ''));
+  }
+  function redo() {
+    if (histIdx >= hist.length - 1) return;
+    histIdx++;
+    applySnap(hist[histIdx].s);
+  }
+  function paintHistBtns() {
+    const u = $('#btn-undo'), r = $('#btn-redo');
+    if (!u) return;
+    u.disabled = histIdx <= 0;
+    r.disabled = histIdx >= hist.length - 1;
+  }
+
   /* ------------------------------------------------------------------ motor */
-  function buildEngine() {
+  function buildEngine(force) {
     const mix = MIXES[state.neg.mix] || MIXES.neutro;
+    const h = JSON.stringify([state.neg, state.proc, state.calib]);
+    if (!force && h === engHash && engine) { engine.mix = mix.w; return; }
+    engHash = h;
     engine = E.build({
       chem: state.proc.chem,
       support: state.neg.support,
@@ -2270,14 +3403,12 @@ kbd {
       calib: state.calib
     });
     engine.mix = mix.w;
-    return engine;
   }
 
   /* --------------------------------------------------------------- dibujado */
   function groundBox() {
     const g = $('#ground');
     const paper = $('#paper');
-    const pad = 26;
     /* El suelo es un grid: si el papel ya está grande, agranda el suelo y la
        medida se realimenta (el papel nunca encoge). Se colapsa un instante
        para medir el hueco de verdad. */
@@ -2287,12 +3418,17 @@ kbd {
     const w = g.clientWidth, h = g.clientHeight;
     paper.style.width = pw;
     paper.style.height = ph;
+    /* clientWidth/Height incluyen el padding, y aquí el padding es el aire que
+       se le deja al panel de herramientas: se descuenta tal cual. */
+    const cs = getComputedStyle(g);
+    const px = (v) => parseFloat(v) || 0;
     return {
-      w: Math.max(80, w - pad * 2),
-      h: Math.max(80, h - pad * 2)
+      w: Math.max(80, w - px(cs.paddingLeft) - px(cs.paddingRight)),
+      h: Math.max(80, h - px(cs.paddingTop) - px(cs.paddingBottom))
     };
   }
 
+  let devSig = '';
   function drawStage() {
     const canvas = $('#cv-main');
     const paper = $('#paper');
@@ -2307,35 +3443,48 @@ kbd {
     paper.style.height = ch + 'px';
     paper.style.setProperty('--paper', '#' + [engine.diag.paperTint.r, engine.diag.paperTint.g, engine.diag.paperTint.b]
       .map((v) => Math.round(v).toString(16).padStart(2, '0')).join(''));
+
+    const useDev = !state.raw && !D.isNeutral(state.dev);
+    const mode = state.raw ? 'orig' : state.mode;
+    if (!devSig) devSig = JSON.stringify(state.dev);
     R.drawPreview(canvas, {
-      eng: engine, img: img, mode: state.mode,
-      w: cw, h: ch, fit: state.out.fit, zoom: zoom,
+      eng: engine, img: img, mode: mode,
+      w: cw, h: ch, fit: state.out.fit, zoom: state.zoom,
       margin: state.out.margin, paperW: state.out.w, paperH: state.out.h,
-      texture: state.proc.texture, mix: engine.mix
+      texture: state.proc.texture, mix: engine.mix,
+      develop: useDev ? state.dev : null,
+      devKey: useDev ? devSig + ':' + imgRev : '',
+      quality: fast ? 0.62 : 1,
+      cache: devCache
     });
     $('#stage-meta').textContent =
       (PAPER_SIZES[state.out.size] ? PAPER_SIZES[state.out.size].name.split(' · ')[0] : 'A medida') +
-      ' · ' + state.out.w + ' × ' + state.out.h + ' mm';
+      ' · ' + state.out.w + ' × ' + state.out.h + ' mm' + (state.raw ? ' · original' : '');
   }
+
+  const devCache = { key: '', data: null };
 
   /* textos de ayuda que dependen del estado */
   function syncHints() {
     if (!engine) return;
     const d = engine.diag;
     const chem = T.CHEM[state.proc.chem];
-    ctrl.dr.setHint('La química pide ' + num(chem.range) + ' D · tu soporte llega a ' + num(d.dmaxSupport) + ' D');
-    ctrl.dr.setActive(!state.neg.autoDr);
+    if (ctrl.dr) {
+      ctrl.dr.setHint('La química pide ' + num(chem.range) + ' D · tu soporte llega a ' + num(d.dmaxSupport) + ' D');
+      ctrl.dr.setActive(!state.neg.autoDr);
+    }
     const calibChip = document.getElementById('calib-chip');
     if (state.calib) {
       if (!calibChip) {
         const c = el('span', { class: 'chip good', id: 'calib-chip', text: 'perfil: ' + state.calib.name });
-        document.getElementById('warnings').appendChild(c);
+        $('#warnings').appendChild(c);
       } else {
         calibChip.textContent = 'perfil: ' + state.calib.name;
       }
     } else if (calibChip) {
       calibChip.remove();
     }
+    paintDirty();
   }
 
   function schedule() {
@@ -2348,6 +3497,18 @@ kbd {
       renderReadouts();
       syncHints();
     });
+  }
+
+  /* un cambio de usuario: guarda, apunta en el historial y repinta */
+  let saveT = null;
+  let mergeable = false;   // ¿este cambio viene de arrastrar un deslizador?
+  function touch(label) {
+    if (saveT) clearTimeout(saveT);
+    saveT = setTimeout(save, 450);
+    pushHistory(label, mergeable);
+    mergeable = false;
+    devSig = '';
+    schedule();
   }
 
   /* ------------------------------------------------------------- lecturas */
@@ -2380,117 +3541,496 @@ kbd {
     chips.slice(0, 2).forEach(([cls, text]) => {
       w.appendChild(el('span', { class: 'chip ' + cls, text: text }));
     });
+
+    const alert = $('#sheet-alert');
+    if (alert) {
+      alert.textContent = '';
+      if (d.capacityShort || d.veiled || d.weak) {
+        alert.hidden = false;
+        alert.appendChild(el('span', { class: 'chip ' + (d.capacityShort ? 'bad' : ''), text: chips[0][1] }));
+      } else {
+        alert.hidden = true;
+      }
+    }
   }
 
-  /* --------------------------------------------------------- panel negativo */
+  /* ================================================== bandeja de herramientas */
+  const ICON = {
+    estilos: '<rect x="3.5" y="3.5" width="7.4" height="7.4" rx="1.7"/><rect x="13.1" y="3.5" width="7.4" height="7.4" rx="1.7"/><rect x="3.5" y="13.1" width="7.4" height="7.4" rx="1.7"/><rect x="13.1" y="13.1" width="7.4" height="7.4" rx="1.7"/>',
+    enfoque: '<path d="M4 8.5V5.6A1.6 1.6 0 0 1 5.6 4h2.9"/><path d="M20 8.5V5.6A1.6 1.6 0 0 0 18.4 4h-2.9"/><path d="M4 15.5v2.9A1.6 1.6 0 0 0 5.6 20h2.9"/><path d="M20 15.5v2.9A1.6 1.6 0 0 1 18.4 20h-2.9"/><circle cx="12" cy="12" r="2.2"/>',
+    lente: '<circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="4.1"/><path d="M12 3.6v3.6M12 16.8v3.6M3.6 12h3.6M16.8 12h3.6"/>',
+    efectos: '<path d="M12 3.4l1.9 4.6 4.6 1.9-4.6 1.9L12 16.4l-1.9-4.6L5.5 9.9l4.6-1.9z"/><path d="M18.4 15.2l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/>',
+    ajustes: '<path d="M4 7.5h5.5M14 7.5h6M4 16.5h6M14.5 16.5H20"/><circle cx="11.6" cy="7.5" r="2.1"/><circle cx="12.1" cy="16.5" r="2.1"/>',
+    negativo: '<circle cx="12" cy="12" r="8.4"/><path d="M12 3.6a8.4 8.4 0 0 1 0 16.8z" fill="currentColor" stroke="none"/>',
+    quimica: '<circle cx="12" cy="11" r="4.2"/><path d="M12 2.6v1.8M12 17.6v1.8M3.6 11H5.4M18.6 11h1.8M6.1 5.1l1.3 1.3M16.6 15.6l1.3 1.3M17.9 5.1l-1.3 1.3M7.4 15.6l-1.3 1.3"/>',
+    ver: '<path d="M2.6 12S6 6.2 12 6.2 21.4 12 21.4 12 18 17.8 12 17.8 2.6 12 2.6 12z"/><circle cx="12" cy="12" r="2.6"/>',
+    salida: '<path d="M12 3.6v10.2"/><path d="M8.4 10.4L12 14l3.6-3.6"/><path d="M4.4 16.4v2.2a1.8 1.8 0 0 0 1.8 1.8h11.6a1.8 1.8 0 0 0 1.8-1.8v-2.2"/>',
+    fuentes: '<circle cx="12" cy="12" r="8.4"/><path d="M12 10.8v5.4"/><circle cx="12" cy="7.9" r="0.9" fill="currentColor" stroke="none"/>'
+  };
+
+  const TOOLS = [
+    { id: 'estilos', name: 'Estilos', note: 'Estilos de revelado, medidos sobre tu foto' },
+    { id: 'enfoque', name: 'Enfoque', note: 'Nitidez, estructura y claridad' },
+    { id: 'lente', name: 'Desenfoque', note: 'Profundidad de campo sobre un foco elíptico' },
+    { id: 'efectos', name: 'Efectos', note: 'Grano, viñeta, brillo, contraste tonal, emulsión' },
+    { id: 'ajustes', name: 'Ajustes', note: 'Punto negro y blanco, medios tonos, contraste' },
+    { id: 'negativo', name: 'Negativo', note: 'Soporte, tinta de bloqueo y rango' },
+    { id: 'quimica', name: 'Cianotipia', note: 'Química, exposición, papel y virado' },
+    { id: 'ver', name: 'Ver', note: 'Qué se muestra, zoom y comparación' },
+    { id: 'salida', name: 'Salida', note: 'Tamaño, resolución y exportación' },
+    { id: 'fuentes', name: 'Fuentes', note: 'De dónde sale cada número' }
+  ];
+
+  let sliders = [];      // controles que responden al arrastre
+  let armed = null;      // el control armado ahora mismo
+
+  /* iconos: SVG estático del propio código, creado con el parser del DOM
+     (sin innerHTML, y sin datos que vengan de fuera) */
+  function svgIcon(paths) {
+    const doc = new DOMParser().parseFromString(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">' + paths + '</svg>',
+      'image/svg+xml');
+    return document.importNode(doc.documentElement, true);
+  }
+
+  function buildRail() {
+    const rail = $('#tray-rail');
+    rail.textContent = '';
+    TOOLS.forEach((t) => {
+      const b = el('button', {
+        class: 'tool', 'aria-pressed': 'false', dataset: { tool: t.id }, title: t.note
+      }, [
+        el('span', { class: 'tool-ico' }, [svgIcon(ICON[t.id])]),
+        el('span', { class: 'tool-name', text: t.name })
+      ]);
+      b.addEventListener('click', () => openTool(state.tool === t.id ? null : t.id));
+      rail.appendChild(b);
+    });
+  }
+
+  function openTool(id) {
+    state.tool = id;
+    document.querySelectorAll('.tool').forEach((b) => {
+      const on = b.dataset.tool === id;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    const sheet = $('#tray-sheet');
+    if (!id) {
+      sheet.hidden = true;
+      armed = null;
+      $('#drag-pill').hidden = true;
+      fitGround();
+      return;
+    }
+    sheet.hidden = false;
+    rebuildSheet();
+  }
+
+  function rebuildSheet() {
+    const id = state.tool;
+    if (!id) return;
+    const t = TOOLS.find((x) => x.id === id);
+    $('#sheet-title').textContent = t.name;
+    $('#sheet-note').textContent = t.note;
+    const body = $('#sheet-body');
+    body.textContent = '';
+    sliders = [];
+    armed = null;
+    const api = {
+      body: body,
+      slider: (o) => regSlider(U.slider(o), o),
+      select: (o) =>
+        U.select(o),
+      toggle: (o) => U.toggle(o),
+      swatches: (o) => U.swatches(o),
+      number: (o) => U.number(o),
+      group: (title, kids) => U.group(title, kids),
+      wide: (node) => { node.classList.add('sheet-wide'); return node; }
+    };
+    BUILD[id](api);
+    $('#sheet-reset').hidden = id === 'fuentes';
+    if (sliders.length) arm(sliders[0]);
+    else $('#drag-pill').hidden = true;
+    paintDirty();
+    requestAnimationFrame(() => {
+      fitGround();
+      const sh = $('#tray-sheet');
+      sh.classList.toggle('has-overflow', sh.scrollHeight > sh.clientHeight + 2);
+    });
+  }
+
+  /* La rejilla del estudio ya recoloca la foto al abrir o cerrar el panel;
+     aquí sólo hay que volver a medir y pintar. */
+  function fitGround() {
+    requestAnimationFrame(drawStage);
+  }
+
+  /* Un slider registrado: además del control normal, responde al arrastre
+     sobre la foto y a las flechas del teclado cuando está armado. */
+  function regSlider(ctl, o) {
+    const node = ctl.node;
+    const input = node.querySelector('input[type="range"]');
+    const rec = {
+      node: node, input: input, label: o.label,
+      min: o.min, max: o.max, step: o.step || 1, fmt: o.fmt || ((v) => String(v)),
+      set: (v) => {
+        mergeable = true;
+        v = Math.max(o.min, Math.min(o.max, v));
+        v = Math.round(v / (o.step || 1)) * (o.step || 1);
+        input.value = v;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      },
+      value: () => +input.value
+    };
+    sliders.push(rec);
+    /* Arrastrar el mando o deslizar sobre la foto es un gesto continuo: sus
+       pasos se funden en una sola entrada del historial. Un clic en un estilo,
+       en cambio, siempre deja su propia entrada. */
+    input.addEventListener('input', () => { mergeable = true; });
+    node.addEventListener('pointerdown', () => arm(rec));
+    if (input) input.addEventListener('focus', () => arm(rec));
+    return ctl;
+  }
+
+  function arm(rec) {
+    if (!rec) return;
+    armed = rec;
+    sliders.forEach((s) => s.node.classList.toggle('is-armed', s === rec));
+    const pill = $('#drag-pill');
+    pill.hidden = false;
+    $('#dp-k').textContent = rec.label;
+    $('#dp-v').textContent = rec.fmt(rec.value());
+  }
+
+  function paintPill() {
+    if (!armed) return;
+    $('#dp-v').textContent = armed.fmt(armed.value());
+  }
+
+  /* ----------------------------------------------------------- herramientas */
+  const BUILD = {};
+
+  /* ---- Estilos ---- */
+  BUILD.estilos = (api) => {
+    const row = el('div', { class: 'looks', role: 'group', 'aria-label': 'Estilos' });
+    const badges = {};
+    const strength = api.slider({
+      id: 'lookstr', label: 'Intensidad del estilo',
+      min: 0, max: 1, step: 0.02, value: state.look.strength == null ? 1 : state.look.strength,
+      fmt: (v) => Math.round(v * 100) + ' %',
+      onInput: (v) => {
+        state.look.strength = v;
+        if (state.look.id !== 'ninguno') {
+          Object.assign(state.dev, P.looks.paramsFor(state.look.id, v));
+        }
+        touch('Estilo');
+      }
+    });
+    if (state.look.id === 'ninguno') strength.node.style.opacity = '0.4';
+
+    P.looks.LIST.forEach((look) => {
+      const cv = document.createElement('canvas');
+      cv.width = 156; cv.height = 156;
+      const btn = el('button', {
+        class: 'look' + (state.look.id === look.id ? ' is-active' : ''),
+        'aria-pressed': state.look.id === look.id ? 'true' : 'false',
+        dataset: { look: look.id }, title: look.note
+      }, [cv, el('span', { class: 'look-name', text: look.name })]);
+      btn.addEventListener('click', () => applyLook(look.id));
+      badges[look.id] = btn;
+      row.appendChild(btn);
+    });
+
+    const note = el('p', { class: 'look-note', text: (P.looks.byId[state.look.id] || { note: '' }).note });
+    api.body.appendChild(row);
+    api.body.appendChild(note);
+    api.body.appendChild(api.wide(U.group(null, [strength.node])));
+
+    // miniaturas reales: revelado del estilo + química elegida
+    const src = thumbSource();
+    const eng = engine;
+    let i = 0;
+    const step = () => {
+      if (i >= P.looks.LIST.length) return;
+      const look = P.looks.LIST[i++];
+      const btn = badges[look.id];
+      const cv = btn.querySelector('canvas');
+      const th = P.looks.thumb(src, P.looks.paramsFor(look.id, 1), eng, 78 * 2);
+      const g2 = cv.getContext('2d');
+      g2.clearRect(0, 0, cv.width, cv.height);
+      if (th.width >= cv.width) g2.drawImage(th, 0, 0, cv.width, cv.height);
+      else g2.drawImage(th, 0, 0);
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+
+  function thumbSource() {
+    return img;
+  }
+
+  function applyLook(id) {
+    state.look.id = id;
+    if (id === 'ninguno') {
+      Object.assign(state.dev, D.defaults());
+    } else {
+      Object.assign(state.dev, P.looks.paramsFor(id, state.look.strength == null ? 1 : state.look.strength));
+    }
+    document.querySelectorAll('.look').forEach((b) => {
+      const on = b.dataset.look === id;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    const note = document.querySelector('.look-note');
+    if (note) note.textContent = (P.looks.byId[id] || { note: '' }).note;
+    pushHistory('Estilo');
+    devSig = '';
+    save();
+    schedule();
+    paintDirty();
+  }
+
+  /* ---- Enfoque ---- */
+  BUILD.enfoque = (api) => {
+    api.body.appendChild(api.wide(el('p', { class: 'sheet-lead', text:
+      'Todo se hace en luz lineal y escalando la luminancia, no los canales: en un negativo, cambiar el color de un borde es cambiar su densidad UV. El umbral evita amplificar el grano; la rodilla evita el halo.' })));
+    api.body.appendChild(api.group('Detalle', [
+      api.slider({
+        id: 'sharp', label: 'Nitidez', min: 0, max: 100, step: 1, value: state.dev.sharp,
+        fmt: (v) => (v > 0 ? '+' : '') + Math.round(v),
+        onInput: (v) => { state.dev.sharp = v; customLook(); touch('Nitidez'); }
+      }).node,
+      api.slider({
+        id: 'radius', label: 'Radio del detalle', min: 0.0006, max: 0.006, step: 0.0002, value: state.dev.radius,
+        fmt: (v) => (v * 900).toFixed(1) + ' px',
+        hint: 'En píxeles sobre una imagen de 900 px de ancho. Se guarda como fracción, así el PNG sale igual que el preview.',
+        onInput: (v) => { state.dev.radius = v; customLook(); touch('Radio'); }
+      }).node,
+      api.slider({
+        id: 'threshold', label: 'Umbral contra el grano', min: 0, max: 40, step: 1, value: state.dev.threshold,
+        fmt: (v) => Math.round(v) + ' / 255',
+        onInput: (v) => { state.dev.threshold = v; customLook(); touch('Umbral'); }
+      }).node
+    ]));
+    api.body.appendChild(api.group('Contraste local', [
+      api.slider({
+        id: 'structure', label: 'Estructura', min: 0, max: 100, step: 1, value: state.dev.structure,
+        fmt: (v) => (v > 0 ? '+' : '') + Math.round(v),
+        hint: 'Detalle medio: texturas, hojas, ladrillo. Es la que más se nota en cianotipo.',
+        onInput: (v) => { state.dev.structure = v; customLook(); touch('Estructura'); }
+      }).node,
+      api.slider({
+        id: 'clarity', label: 'Claridad', min: 0, max: 100, step: 1, value: state.dev.clarity,
+        fmt: (v) => (v > 0 ? '+' : '') + Math.round(v),
+        hint: 'Radio grande. Separa el sujeto del fondo sin tocar los bordes finos.',
+        onInput: (v) => { state.dev.clarity = v; customLook(); touch('Claridad'); }
+      }).node
+    ]));
+  };
+
+  /* ---- Desenfoque de lente ---- */
+  BUILD.lente = (api) => {
+    api.body.appendChild(api.wide(el('p', { class: 'sheet-lead', text:
+      'Un foco elíptico: dentro la foto queda nítida, fuera se abre el desenfoque. Las luces del fondo ganan cuerpo antes de emborronarse, que es lo que hace una lente de verdad y no un simple desenfoque.' })));
+    api.body.appendChild(api.group('Desenfoque', [
+      api.slider({
+        id: 'lens', label: 'Intensidad', min: 0, max: 100, step: 1, value: state.dev.lens,
+        fmt: (v) => (v > 0 ? '+' : '') + Math.round(v),
+        onInput: (v) => { state.dev.lens = v; customLook(); touch('Desenfoque'); }
+      }).node,
+      api.slider({
+        id: 'lensTrans', label: 'Transición', min: 0.05, max: 1, step: 0.01, value: state.dev.lensTrans,
+        fmt: (v) => Math.round(v * 100) + ' %',
+        onInput: (v) => { state.dev.lensTrans = v; customLook(); touch('Transición'); }
+      }).node,
+      api.slider({
+        id: 'lensBokeh', label: 'Cuerpo de las luces', min: 0, max: 100, step: 1, value: state.dev.lensBokeh,
+        fmt: (v) => Math.round(v) + ' %',
+        hint: 'Bokeh: engorda los puntos de luz del fondo antes de desenfocar.',
+        onInput: (v) => { state.dev.lensBokeh = v; customLook(); touch('Bokeh'); }
+      }).node
+    ]));
+    api.body.appendChild(api.group('Foco', [
+      api.slider({
+        id: 'lensSize', label: 'Tamaño del foco', min: 0.12, max: 1, step: 0.01, value: state.dev.lensSize,
+        fmt: (v) => Math.round(v * 100) + ' %',
+        onInput: (v) => { state.dev.lensSize = v; customLook(); touch('Foco'); }
+      }).node,
+      api.slider({
+        id: 'lensY', label: 'Altura del foco', min: 0, max: 1, step: 0.01, value: state.dev.lensY,
+        fmt: (v) => Math.round(v * 100) + ' % del alto',
+        onInput: (v) => { state.dev.lensY = v; customLook(); touch('Foco'); }
+      }).node
+    ]));
+  };
+
+  /* ---- Efectos ---- */
+  BUILD.efectos = (api) => {
+    api.body.appendChild(api.wide(el('p', { class: 'sheet-lead', text:
+      'Todo esto va dentro del negativo, así que se imprime: no es un adorno de la previsualización. El grano del papel sigue estando en Cianotipia.' })));
+    api.body.appendChild(api.group('Grano y emulsión', [
+      api.slider({
+        id: 'grain', label: 'Grano de película', min: 0, max: 100, step: 1, value: state.dev.grain,
+        fmt: (v) => Math.round(v) + ' %',
+        onInput: (v) => { state.dev.grain = v; customLook(); touch('Grano'); }
+      }).node,
+      api.slider({
+        id: 'grainSize', label: 'Tamaño del grano', min: 0.4, max: 3, step: 0.1, value: state.dev.grainSize,
+        fmt: (v) => v.toFixed(1) + '×',
+        onInput: (v) => { state.dev.grainSize = v; customLook(); touch('Grano'); }
+      }).node,
+      api.slider({
+        id: 'textura', label: 'Irregularidad de la emulsión', min: 0, max: 100, step: 1, value: state.dev.textura,
+        fmt: (v) => Math.round(v) + ' %',
+        hint: 'Una cianotipia nunca se revela igual en toda la hoja. Esto lo mete en la imagen.',
+        onInput: (v) => { state.dev.textura = v; customLook(); touch('Emulsión'); }
+      }).node,
+      api.select({
+        id: 'texturatipo', label: 'Tipo de irregularidad',
+        value: state.dev.texturaTipo,
+        options: [
+          { value: 'pincel', label: 'Pincelada' },
+          { value: 'fibra', label: 'Fibra del papel' },
+          { value: 'mancha', label: 'Manchas de revelado' }
+        ],
+        onChange: (v) => { state.dev.texturaTipo = v; customLook(); touch('Emulsión'); }
+      }).node
+    ]));
+    api.body.appendChild(api.group('Luz', [
+      api.slider({
+        id: 'glow', label: 'Brillo difuso', min: 0, max: 100, step: 1, value: state.dev.glow,
+        fmt: (v) => Math.round(v) + ' %',
+        onInput: (v) => { state.dev.glow = v; customLook(); touch('Brillo'); }
+      }).node,
+      api.slider({
+        id: 'glowWarm', label: 'Temperatura del brillo', min: -100, max: 100, step: 1, value: state.dev.glowWarm,
+        fmt: (v) => (v === 0 ? 'neutra' : (v > 0 ? '+' : '') + Math.round(v)),
+        onInput: (v) => { state.dev.glowWarm = v; customLook(); touch('Temperatura'); }
+      }).node,
+      api.slider({
+        id: 'vignette', label: 'Viñeta', min: -100, max: 100, step: 1, value: state.dev.vignette,
+        fmt: (v) => (v > 0 ? '+' : '') + Math.round(v),
+        onInput: (v) => { state.dev.vignette = v; customLook(); touch('Viñeta'); }
+      }).node,
+      api.slider({
+        id: 'vignetteMid', label: 'Círculo limpio', min: 0, max: 100, step: 1, value: state.dev.vignetteMid,
+        fmt: (v) => Math.round(v) + ' %',
+        onInput: (v) => { state.dev.vignetteMid = v; customLook(); touch('Viñeta'); }
+      }).node
+    ]));
+    api.body.appendChild(api.group('Contraste por bandas', [
+      api.slider({
+        id: 'tonal', label: 'Contraste tonal', min: -100, max: 100, step: 1, value: state.dev.tonal,
+        fmt: (v) => (v > 0 ? '+' : '') + Math.round(v),
+        hint: 'Lo que hace revelar con dos exposiciones y enmascarar, pero por separado.',
+        onInput: (v) => { state.dev.tonal = v; customLook(); touch('Contraste tonal'); }
+      }).node,
+      api.slider({
+        id: 'shadows', label: 'Sombras', min: -100, max: 100, step: 1, value: state.dev.shadows,
+        fmt: (v) => (v > 0 ? '+' : '') + Math.round(v),
+        onInput: (v) => { state.dev.shadows = v; customLook(); touch('Sombras'); }
+      }).node,
+      api.slider({
+        id: 'mids', label: 'Medios', min: -100, max: 100, step: 1, value: state.dev.mids,
+        fmt: (v) => (v > 0 ? '+' : '') + Math.round(v),
+        onInput: (v) => { state.dev.mids = v; customLook(); touch('Medios'); }
+      }).node,
+      api.slider({
+        id: 'highs', label: 'Luces', min: -100, max: 100, step: 1, value: state.dev.highs,
+        fmt: (v) => (v > 0 ? '+' : '') + Math.round(v),
+        onInput: (v) => { state.dev.highs = v; customLook(); touch('Luces'); }
+      }).node
+    ]));
+  };
+
   const ctrl = {};
 
-  function buildNegPanel() {
-    const box = $('#controls-neg');
-    box.textContent = '';
+  /* ---- Ajustes (curva de tono) ---- */
+  BUILD.ajustes = (api) => {
+    api.body.appendChild(api.wide(el('p', { class: 'sheet-lead', text:
+      'La curva de tono lleva la imagen a la escala de azul. Es la parte del negativo que sí conviene tocar a mano: el resto lo decide la química.' })));
+    api.body.appendChild(api.group('Extremos', [
+      api.slider({
+        id: 'black', label: 'Punto negro', min: 0, max: 40, step: 1, value: state.neg.black,
+        fmt: (v) => 'L ' + v,
+        hint: 'Dónde empieza el azul. Súbelo si la copia tiene un gris sucio en las sombras.',
+        onInput: (v) => { state.neg.black = v; touch('Punto negro'); }
+      }).node,
+      api.slider({
+        id: 'white', label: 'Punto blanco', min: 55, max: 100, step: 1, value: state.neg.white,
+        fmt: (v) => 'L ' + v,
+        hint: 'Dónde el papel se queda limpio. Bájalo para dejar blancos de verdad.',
+        onInput: (v) => { state.neg.white = v; touch('Punto blanco'); }
+      }).node
+    ]));
+    api.body.appendChild(api.group('Curva', [
+      api.slider({
+        id: 'gamma', label: 'Medios tonos', min: 0.5, max: 2, step: 0.02, value: state.neg.gamma,
+        fmt: (v) => v.toFixed(2),
+        onInput: (v) => { state.neg.gamma = v; touch('Medios tonos'); }
+      }).node,
+      api.slider({
+        id: 'contrast', label: 'Contraste de la curva', min: -1, max: 1, step: 0.05, value: state.neg.contrast,
+        fmt: (v) => (v > 0 ? '+' : '') + v.toFixed(2),
+        onInput: (v) => { state.neg.contrast = v; touch('Contraste'); }
+      }).node,
+      api.select({
+        id: 'mix', label: 'Mezcla a blanco y negro',
+        value: state.neg.mix,
+        options: Object.keys(MIXES).map((k) => ({ value: k, label: MIXES[k].name })),
+        hint: 'Cómo se pesan los canales al pasar a gris. «Cielos profundos» hunde el azul del cielo, que en cianotipo se lee casi igual que el blanco.',
+        onChange: (v) => { state.neg.mix = v; touch('Mezcla'); }
+      }).node
+    ]));
+  };
 
-    ctrl.support = U.select({
-      id: 'support', label: 'Soporte del negativo',
-      value: state.neg.support,
-      options: Object.keys(E.SUPPORT).map((k) => ({ value: k, label: E.SUPPORT[k].name })),
-      hint: E.SUPPORT[state.neg.support].note,
-      onChange: (v) => {
-        state.neg.support = v;
-        ctrl.support.setHint(E.SUPPORT[v].note);
-        save(); schedule();
-      }
-    });
-
-    ctrl.ink = U.swatches({
-      id: 'ink', label: 'Tinta de bloqueo',
-      value: state.neg.ink,
-      hint: E.INK[state.neg.ink].note,
-      options: Object.keys(E.INK).map((k) => ({
-        value: k,
-        label: E.INK[k].name,
-        css: 'rgb(' + E.INK[k].rgb.join(',') + ')'
-      })),
-      onChange: (v) => {
-        state.neg.ink = v;
-        ctrl.ink.setHint(E.INK[v].note);
-        save(); schedule();
-      }
-    });
-
-    ctrl.dr = U.slider({
-      id: 'dr', label: 'Rango del negativo',
-      min: 0.4, max: 2.6, step: 0.05, value: state.neg.dr,
+  /* ---- Negativo ---- */
+  BUILD.negativo = (api) => {
+    api.body.appendChild(api.wide(el('p', { class: 'sheet-lead', text:
+      'El negativo es lo único que se imprime. Aquí se decide cuánta densidad UV pides y con qué tinta la consigues.' })));
+    api.body.appendChild(api.group('Soporte y tinta', [
+      api.select({
+        id: 'support', label: 'Soporte del negativo',
+        value: state.neg.support,
+        options: Object.keys(E.SUPPORT).map((k) => ({ value: k, label: E.SUPPORT[k].name })),
+        hint: E.SUPPORT[state.neg.support].note,
+        onChange: (v) => { state.neg.support = v; touch('Soporte'); rebuildSheet(); }
+      }).node,
+      api.swatches({
+        id: 'ink', label: 'Tinta de bloqueo',
+        value: state.neg.ink,
+        hint: E.INK[state.neg.ink].note,
+        options: Object.keys(E.INK).map((k) => ({
+          value: k, label: E.INK[k].name, css: 'rgb(' + E.INK[k].rgb.join(',') + ')'
+        })),
+        onChange: (v) => { state.neg.ink = v; touch('Tinta'); rebuildSheet(); }
+      }).node
+    ]));
+    ctrl.dr = api.slider({
+      id: 'dr', label: 'Rango del negativo', min: 0.4, max: 2.6, step: 0.05, value: state.neg.dr,
       fmt: (v) => v.toFixed(2) + ' log D',
-      onInput: (v) => {
-        state.neg.dr = v;
-        state.neg.autoDr = false;
-        ctrl.autoDr.set(false);
-        save(); schedule();
-      }
+      onInput: (v) => { state.neg.dr = v; state.neg.autoDr = false; ctrl.autoDr.set(false); touch('Rango'); }
     });
-
-    ctrl.autoDr = U.toggle({
+    ctrl.autoDr = api.toggle({
       id: 'autodr', label: 'Ajustar al proceso',
       value: state.neg.autoDr,
-      hint: 'Usa el rango que pide la química elegida.',
+      hint: 'Usa el rango que pide la química elegida: la clásica pide 1,15 D; la nueva cianotipia, más de 2.',
       onChange: (v) => {
         state.neg.autoDr = v;
-        if (v) {
-          state.neg.dr = T.CHEM[state.proc.chem].range;
-          ctrl.dr.set(state.neg.dr);
-        }
-        save(); schedule();
+        if (v) { state.neg.dr = T.CHEM[state.proc.chem].range; ctrl.dr.set(state.neg.dr); }
+        touch('Rango');
       }
     });
+    api.body.appendChild(api.wide(U.group('Rango', [ctrl.dr.node, ctrl.autoDr.node])));
+  };
 
-    ctrl.black = U.slider({
-      id: 'black', label: 'Punto negro',
-      min: 0, max: 40, step: 1, value: state.neg.black,
-      fmt: (v) => 'L ' + v,
-      onInput: (v) => { state.neg.black = v; save(); schedule(); }
-    });
-
-    ctrl.white = U.slider({
-      id: 'white', label: 'Punto blanco',
-      min: 55, max: 100, step: 1, value: state.neg.white,
-      fmt: (v) => 'L ' + v,
-      onInput: (v) => { state.neg.white = v; save(); schedule(); }
-    });
-
-    ctrl.gamma = U.slider({
-      id: 'gamma', label: 'Medios tonos',
-      min: 0.5, max: 2, step: 0.02, value: state.neg.gamma,
-      fmt: (v) => v.toFixed(2),
-      onInput: (v) => { state.neg.gamma = v; save(); schedule(); }
-    });
-
-    ctrl.contrast = U.slider({
-      id: 'contrast', label: 'Contraste de la curva',
-      min: -1, max: 1, step: 0.05, value: state.neg.contrast,
-      fmt: (v) => (v > 0 ? '+' : '') + v.toFixed(2),
-      onInput: (v) => { state.neg.contrast = v; save(); schedule(); }
-    });
-
-    ctrl.mix = U.select({
-      id: 'mix', label: 'Mezcla a blanco y negro',
-      value: state.neg.mix,
-      options: Object.keys(MIXES).map((k) => ({ value: k, label: MIXES[k].name })),
-      hint: 'Cómo se pesan los canales al pasar a gris.',
-      onChange: (v) => { state.neg.mix = v; save(); schedule(); }
-    });
-
-    box.appendChild(U.group('Soporte y tinta', [ctrl.support.node, ctrl.ink.node]));
-    box.appendChild(U.group('Rango y curva', [ctrl.dr.node, ctrl.autoDr.node, ctrl.black.node, ctrl.white.node, ctrl.gamma.node, ctrl.contrast.node]));
-    box.appendChild(U.group('Imagen', [ctrl.mix.node]));
-  }
-
-  /* ---------------------------------------------------------- panel proceso */
-  function buildPrintPanel() {
-    const box = $('#controls-print');
-    box.textContent = '';
-
+  /* ---- Cianotipia ---- */
+  BUILD.quimica = (api) => {
     const chem0 = T.CHEM[state.proc.chem];
-    ctrl.chem = U.select({
+    api.body.appendChild(api.wide(el('p', { class: 'sheet-lead', text:
+      'La química fija el rango de densidad que hay que meterle al negativo. Si no coincides con tu tira de pasos, calibra: la app cambia el negativo, no la copia.' })));
+    ctrl.chem = api.select({
       id: 'chem', label: 'Química',
       value: state.proc.chem,
       options: Object.keys(T.CHEM).map((k) => ({ value: k, label: T.CHEM[k].name })),
@@ -2498,190 +4038,244 @@ kbd {
       onChange: (v) => {
         state.proc.chem = v;
         state.proc.printDmax = T.CHEM[v].printDmax;
-        ctrl.chem.setHint(T.CHEM[v].note);
-        ctrl.dmax.set(T.CHEM[v].printDmax);
-        if (state.neg.autoDr) {
-          state.neg.dr = T.CHEM[v].range;
-          ctrl.dr.set(state.neg.dr);
-        }
-        save(); schedule();
+        if (state.neg.autoDr) state.neg.dr = T.CHEM[v].range;
+        touch('Química');
+        rebuildSheet();
       }
     });
-
-    ctrl.exposure = U.slider({
-      id: 'exposure', label: 'Exposición',
-      min: -2, max: 2, step: 0.05, value: state.proc.exposure,
+    ctrl.exposure = api.slider({
+      id: 'exposure', label: 'Exposición', min: -2, max: 2, step: 0.05, value: state.proc.exposure,
       fmt: (v) => (v > 0 ? '+' : '') + v.toFixed(2) + ' pasos',
       hint: '0 = el tiempo con el que calibraste. Cada paso dobla o reduce a la mitad.',
-      onInput: (v) => { state.proc.exposure = v; save(); schedule(); }
+      onInput: (v) => { state.proc.exposure = v; touch('Exposición'); }
     });
-
-    ctrl.dmax = U.slider({
-      id: 'dmax', label: 'Azul máximo (Dmáx)',
-      min: 0.9, max: 1.8, step: 0.02, value: state.proc.printDmax,
+    ctrl.dmax = api.slider({
+      id: 'dmax', label: 'Azul máximo (Dmáx)', min: 0.9, max: 1.8, step: 0.02, value: state.proc.printDmax,
       fmt: (v) => v.toFixed(2) + ' log D',
-      hint: 'Densidad de la copia terminada. Papel satinado aguanta algo más.',
-      onInput: (v) => { state.proc.printDmax = v; save(); schedule(); }
+      hint: 'Densidad de la copia terminada. Estimación: ninguna fuente publica el Dmáx real de cada química. Papel satinado aguanta algo más.',
+      onInput: (v) => { state.proc.printDmax = v; touch('Azul máximo'); }
     });
+    api.body.appendChild(api.group('Proceso', [ctrl.chem.node, ctrl.exposure.node, ctrl.dmax.node]));
 
-    ctrl.paper = U.select({
-      id: 'paper', label: 'Papel',
-      value: state.proc.paper,
-      options: Object.keys(S.PAPER).map((k) => ({ value: k, label: S.PAPER[k].name })),
-      onChange: (v) => { state.proc.paper = v; save(); schedule(); }
-    });
+    api.body.appendChild(api.group('Material', [
+      api.select({
+        id: 'paper', label: 'Papel', value: state.proc.paper,
+        options: Object.keys(S.PAPER).map((k) => ({ value: k, label: S.PAPER[k].name })),
+        onChange: (v) => { state.proc.paper = v; touch('Papel'); }
+      }).node,
+      api.slider({
+        id: 'oxid', label: 'Oxidación', min: 0, max: 1, step: 0.02, value: state.proc.oxidation,
+        fmt: (v) => (v > 0.98 ? 'estabilizada' : v < 0.1 ? 'recién lavada' : Math.round(v * 24) + ' h'),
+        hint: 'El azul sube durante las primeras 24 h de secado. El peróxido lo hace al instante.',
+        onInput: (v) => { state.proc.oxidation = v; touch('Oxidación'); }
+      }).node,
+      api.slider({
+        id: 'paptex', label: 'Grano del papel', min: 0, max: 1, step: 0.05, value: state.proc.texture,
+        fmt: (v) => (v < 0.03 ? 'liso' : Math.round(v * 100) + ' %'),
+        hint: 'Solo afecta a la previsualización. El grano que se imprime está en Efectos.',
+        onInput: (v) => { state.proc.texture = v; touch('Grano del papel'); }
+      }).node
+    ]));
 
-    ctrl.oxid = U.slider({
-      id: 'oxid', label: 'Oxidación',
-      min: 0, max: 1, step: 0.02, value: state.proc.oxidation,
-      fmt: (v) => (v > 0.98 ? 'estabilizada' : v < 0.1 ? 'recién lavada' : Math.round(v * 24) + ' h'),
-      hint: 'El azul sube durante las primeras 24 h de secado.',
-      onInput: (v) => { state.proc.oxidation = v; save(); schedule(); }
-    });
-
-    ctrl.texture = U.slider({
-      id: 'texture', label: 'Grano del papel',
-      min: 0, max: 1, step: 0.05, value: state.proc.texture,
-      fmt: (v) => (v < 0.03 ? 'liso' : Math.round(v * 100) + ' %'),
-      hint: 'Solo afecta a la previsualización.',
-      onInput: (v) => { state.proc.texture = v; save(); schedule(); }
-    });
-
-    ctrl.toner = U.select({
-      id: 'toner', label: 'Virado',
-      hint: 'Te, tanino o café sobre la copia ya lavada.',
-      value: state.proc.toner,
-      options: Object.keys(S.TONER).map((k) => ({ value: k, label: S.TONER[k].name })),
-      onChange: (v) => {
-        state.proc.toner = v;
-        ctrl.tonerAmt.node.style.display = v === 'ninguno' ? 'none' : '';
-        save(); schedule();
-      }
-    });
-
-    ctrl.tonerAmt = U.slider({
-      id: 'toneramt', label: 'Intensidad del virado',
-      min: 0, max: 1, step: 0.05, value: state.proc.tonerAmount,
+    ctrl.tonerAmt = api.slider({
+      id: 'toneramt', label: 'Intensidad del virado', min: 0, max: 1, step: 0.05, value: state.proc.tonerAmount,
       fmt: (v) => Math.round(v * 100) + ' %',
-      onInput: (v) => { state.proc.tonerAmount = v; save(); schedule(); }
+      onInput: (v) => { state.proc.tonerAmount = v; touch('Virado'); }
     });
-
-    box.appendChild(U.group('Proceso', [ctrl.chem.node, ctrl.exposure.node, ctrl.dmax.node]));
-    box.appendChild(U.group('Material', [ctrl.paper.node, ctrl.oxid.node, ctrl.texture.node]));
     ctrl.tonerAmt.node.style.display = state.proc.toner === 'ninguno' ? 'none' : '';
-    box.appendChild(U.group('Virado', [ctrl.toner.node, ctrl.tonerAmt.node]));
-  }
+    api.body.appendChild(api.group('Virado', [
+      api.select({
+        id: 'toner', label: 'Virado', value: state.proc.toner,
+        hint: 'Sobre la copia ya lavada. Tanino, té o café: los que documenta Jacquard.',
+        options: Object.keys(S.TONER).map((k) => ({ value: k, label: S.TONER[k].name })),
+        onChange: (v) => {
+          state.proc.toner = v;
+          ctrl.tonerAmt.node.style.display = v === 'ninguno' ? 'none' : '';
+          touch('Virado');
+        }
+      }).node,
+      ctrl.tonerAmt.node
+    ]));
+  };
 
-  /* --------------------------------------------------------------- salida */
-  function buildOutPanel() {
-    const box = $('#controls-out');
-    box.textContent = '';
+  /* ---- Ver ---- */
+  BUILD.ver = (api) => {
+    api.body.appendChild(api.group('Qué se muestra', [
+      api.wide(el('div', { class: 'sheet-seg' }, [
+        ...['print', 'neg', 'orig', 'side'].map((m) => {
+          const names = { print: 'Cianotipia', neg: 'Negativo', orig: 'Foto', side: 'Lado a lado' };
+          const b = el('button', { class: state.mode === m ? 'is-active' : '', text: names[m] });
+          b.addEventListener('click', () => {
+            state.mode = m;
+            document.querySelectorAll('#mode-seg button').forEach((x) => x.classList.toggle('is-active', x.dataset.mode === m));
+            document.querySelectorAll('.sheet-seg button').forEach((x) => x.classList.toggle('is-active', x === b));
+            drawStage();
+          });
+          return b;
+        })
+      ]))
+    ]));
+    api.body.appendChild(api.group('Zoom', [
+      api.slider({
+        id: 'zoom', label: 'Ampliación', min: 0.5, max: 3, step: 0.05, value: state.zoom,
+        fmt: (v) => Math.round(v * 100) + ' %',
+        hint: 'También con ⌥ + rueda sobre la foto. Sólo cambia la previsualización.',
+        onInput: (v) => { state.zoom = v; drawStage(); }
+      }).node
+    ]));
+    const lado = api.group('Comparar', [
+      api.toggle({
+        id: 'raw', label: 'Ver la foto sin revelar',
+        value: state.raw,
+        hint: 'O mantén pulsado el botón de comparar en la barra de arriba.',
+        onChange: (v) => { state.raw = v; $('#btn-compare').classList.toggle('is-on', v); drawStage(); }
+      }).node
+    ]);
+    api.body.appendChild(lado);
+  };
 
-    ctrl.size = U.select({
-      id: 'size', label: 'Tamaño de papel',
-      value: state.out.size,
+  /* ---- Salida ---- */
+  BUILD.salida = (api) => {
+    api.body.appendChild(api.wide(el('p', { class: 'sheet-lead', text:
+      'El negativo se genera a tamaño físico. Nada de «ajustar a la página»: si la escala se va un 3 %, la copia no coincide nunca.' })));
+    ctrl.size = api.select({
+      id: 'size', label: 'Tamaño de papel', value: state.out.size,
       options: Object.keys(PAPER_SIZES).map((k) => ({ value: k, label: PAPER_SIZES[k].name })),
       onChange: (v) => {
         state.out.size = v;
-        if (v !== 'custom') {
-          state.out.w = PAPER_SIZES[v].w;
-          state.out.h = PAPER_SIZES[v].h;
-        }
-        save(); schedule(); syncOut();
+        if (v !== 'custom') { state.out.w = PAPER_SIZES[v].w; state.out.h = PAPER_SIZES[v].h; }
+        touch('Papel'); rebuildSheet(); syncOut();
       }
     });
-
-    ctrl.mmW = U.number({
+    ctrl.mmW = api.number({
       id: 'mmw', label: 'Ancho (mm)', min: 40, max: 330, step: 1, value: state.out.w,
-      onInput: (v) => { state.out.w = v; state.out.size = 'custom'; ctrl.size.set('custom'); save(); schedule(); syncOut(); }
+      onInput: (v) => { state.out.w = v; state.out.size = 'custom'; ctrl.size.set('custom'); touch('Tamaño'); syncOut(); }
     });
-    ctrl.mmH = U.number({
+    ctrl.mmH = api.number({
       id: 'mmh', label: 'Alto (mm)', min: 40, max: 480, step: 1, value: state.out.h,
-      onInput: (v) => { state.out.h = v; state.out.size = 'custom'; ctrl.size.set('custom'); save(); schedule(); syncOut(); }
+      onInput: (v) => { state.out.h = v; state.out.size = 'custom'; ctrl.size.set('custom'); touch('Tamaño'); syncOut(); }
     });
-
-    ctrl.margin = U.slider({
-      id: 'margin', label: 'Margen',
-      min: 0, max: 20, step: 1, value: state.out.margin,
+    ctrl.margin = api.slider({
+      id: 'margin', label: 'Margen', min: 0, max: 20, step: 1, value: state.out.margin,
       fmt: (v) => v + ' mm',
-      hint: 'La ET-2865 no imprime hasta el borde salvo que actives sin márgenes.',
-      onInput: (v) => { state.out.margin = v; save(); }
+      onInput: (v) => { state.out.margin = v; touch('Margen'); drawStage(); syncOut(); }
     });
-
-    ctrl.fit = U.select({
-      id: 'fit', label: 'Encaje de la imagen',
-      value: state.out.fit,
+    ctrl.fit = api.select({
+      id: 'fit', label: 'Encaje de la imagen', value: state.out.fit,
       options: [
         { value: 'cover', label: 'Recortar para llenar' },
         { value: 'contain', label: 'Encajar entera' },
         { value: 'width', label: 'Ajustar al ancho' }
       ],
-      onChange: (v) => { state.out.fit = v; save(); schedule(); }
+      onChange: (v) => { state.out.fit = v; touch('Encaje'); }
     });
+    api.body.appendChild(api.group('Papel', [ctrl.size.node, ctrl.mmW.node, ctrl.mmH.node, ctrl.margin.node, ctrl.fit.node]));
+    api.body.appendChild(api.group('Archivo', [
+      api.select({
+        id: 'dpi', label: 'Resolución', value: String(state.out.dpi),
+        options: [{ value: '360', label: '360 ppp' }, { value: '720', label: '720 ppp (máxima)' }],
+        hint: '360 es la base nativa del cabezal; 720 duplica el archivo.',
+        onChange: (v) => { state.out.dpi = +v; touch('Resolución'); syncOut(); }
+      }).node,
+      api.toggle({
+        id: 'mirror', label: 'Espejar el negativo', value: state.out.mirror,
+        hint: 'Va con la tinta contra el papel: sin espejar, la copia sale invertida.',
+        onChange: (v) => { state.out.mirror = v; touch('Espejo'); }
+      }).node,
+      api.toggle({
+        id: 'marks', label: 'Marcas de corte y etiqueta', value: state.out.marks,
+        onChange: (v) => { state.out.marks = v; touch('Marcas'); }
+      }).node
+    ]));
+    const act = el('div', { class: 'sheet-wide sheet-actions' }, [
+      el('button', { class: 'btn btn-primary', text: 'Guardar negativo (PNG)', onclick: (ev) => doExport(ev.currentTarget) }),
+      el('button', { class: 'btn btn-quiet', text: 'Imprimir…', onclick: doPrint }),
+      el('button', { class: 'btn btn-quiet', text: 'Probar escala', onclick: doRuler })
+    ]);
+    api.body.appendChild(act);
+    api.body.appendChild(api.wide(el('p', { class: 'step-note', id: 'out-hint-2' })));
+    syncOut();
+  };
 
-    ctrl.dpi = U.select({
-      id: 'dpi', label: 'Resolución',
-      value: String(state.out.dpi),
-      options: [
-        { value: '360', label: '360 ppp' },
-        { value: '720', label: '720 ppp (máxima)' }
-      ],
-      hint: '360 es la base nativa del cabezal; 720 duplica el archivo.',
-      onChange: (v) => { state.out.dpi = +v; save(); syncOut(); }
+  /* ---- Fuentes ---- */
+  const FUENTES = [
+    ['Química', [
+      ['A + B', '40 g de ferricianuro en 400 ml + 100 g de citrato férrico amónico en 400 ml. Mezclar 1:1 → 5 % + 12,5 %.', 'doc'],
+      ['La clásica de Ware', '25 g de citrato y 10 g de ferricianuro por 100 ml, a partes iguales: el doble de concentrada que la mezcla de trabajo del kit Jacquard, que da 12,5 % + 5 %. El preset «clásica» de la app usa 20 % + 8 %, la fórmula tradicional más citada.', 'doc'],
+      ['Vida de la mezcla', 'De 2 a 4 horas. Las disoluciones madre aguantan mucho tiempo; el papel ya recubierto, hasta 6 meses a oscuras.', 'doc'],
+      ['Rango que pide la química', 'Clásica 1,0-1,2 log D. Nueva cianotipia (Ware) 1,8-2,4. La app arranca en esos valores.', 'doc'],
+      ['Dmáx de la copia', '1,1-1,5 log D según química. Ninguna fuente publica el número real: es una estimación de la app, no una medida.', 'estimado']
+    ]],
+    ['Exposición', [
+      ['Kit Jacquard al sol', '10-20 minutos según condiciones (ficha del kit).', 'doc'],
+      ['Clásica al sol', '3-8 minutos: estimación propia para negativo denso. Jacquard da 1-30 min como marco general de su química.', 'estimado'],
+      ['Nueva cianotipia', 'Menos de 5 min bajo luz UVA (Ware). Son minutos de UV, no de sol: la etiqueta importa.', 'doc'],
+      ['Pasarse es mejor', 'Sobre-exponer casi siempre se prefiere a quedarse corto. Si sale velado, la mitad de tiempo; si sale corto, el doble.', 'doc']
+    ]],
+    ['Negativo', [
+      ['Techo del film', '1,85 log D medido sobre film de inyección con esta ET-2865. Es el techo de esta cadena, no una capacidad universal.', 'medido'],
+      ['Tintas dye', 'Negro puro ~1,05 D; color compuesto ~1,8 D. En tintas de colorante el negro está optimizado para el visible y se queda corto en UV.', 'medido'],
+      ['Amarillo dominante', 'El amarillo absorbe 400-480 nm, la cola que el cianotipo todavía ve. La app usa oliva (Y100 M50 C75).', 'medido'],
+      ['Negativo coloreado', 'EDN: con negativo rojizo (HSB 330-100-0) salen 57 tonos útiles frente a 23 en negro, en tabla de 101 campos y en cianotipo. Mide cantidad de tonos, no densidad UV.', 'doc'],
+      ['Corrección por tabla', 'EDN rechaza las curvas de Photoshop por posterización y por el efecto palanca sobre los valores vecinos, y corrige con un mapa de tonos calculado sobre una cuña de 256 parches. Esta app usa un spline monótono sobre 21-101 parches.', 'doc']
+    ]],
+    ['Calibración', [
+      ['Tonos útiles del cianotipo', 'Entre 17 y 23 tonos según la página de EDN. Es el proceso más corto de la lista: por eso el rango importa más que el contraste.', 'doc'],
+      ['Por qué el negativo, no la copia', 'Se corrige lo que se imprime. La copia no se puede retocar; el negativo sí, y el perfil queda guardado.', 'doc'],
+      ['Segunda pasada', 'EDN recomienda repetir la carta una vez corregida («corrección de la corrección»). La app la deja a mano: imprime la carta otra vez y vuelve a analizarla.', 'doc'],
+      ['Repetir muestras', 'EDN promedia al menos tres lecturas por parche. La app ya promedia una fila de píxeles por paso, pero no varias fotos.', 'doc']
+    ]],
+    ['Lo que no es de nadie', [
+      ['Ganancias de tinta', 'Los factores por tinta (1,0 oliva … 0,5 magenta) son una heurística de la app para ordenar el efecto. No son densidades medidas por tinta.', 'estimado'],
+      ['Oxidación', 'El ancla es 24 h hasta el azul final, documentada; la forma de la curva es una heurística.', 'estimado'],
+      ['Texturas de emulsión', 'Inventadas con ruido: no pretenden reproducir una emulsión concreta.', 'estimado']
+    ]]
+  ];
+
+  BUILD.fuentes = (api) => {
+    const wrap = el('div', { class: 'fuentes' });
+    wrap.appendChild(el('p', { class: 'sheet-lead', text:
+      'Cada cifra de la app, de dónde sale y cuánto se fía uno de ella. «Documentado» = está en la ficha de Jacquard o en Mike Ware. «Medido» = propio, sobre la ET-2865. «Estimado» = heurística de la app, sin fuente.' }));
+    FUENTES.forEach(([titulo, filas]) => {
+      const g = el('div', { class: 'fuente-grupo' }, [el('h3', { text: titulo })]);
+      filas.forEach(([k, v, tag]) => {
+        g.appendChild(el('div', { class: 'fuente-fila' }, [
+          el('b', { text: k }),
+          el('span', { text: v }),
+          el('span', { class: 'tag ' + tag, text: tag })
+        ]));
+      });
+      wrap.appendChild(g);
     });
+    api.body.appendChild(wrap);
+  };
 
-    ctrl.mirror = U.toggle({
-      id: 'mirror', label: 'Espejar el negativo',
-      value: state.out.mirror,
-      hint: 'Va con la tinta contra el papel: sin espejar, la copia sale invertida.',
-      onChange: (v) => { state.out.mirror = v; save(); }
+  /* Marca el estilo como «personalizado» cuando se toca un control del revelado */
+  function customLook() {
+    if (state.look.id === 'ninguno') return;
+    state.look.id = 'personalizado';
+    const note = document.querySelector('.look-note');
+    if (note) note.textContent = 'Ajustes propios sobre el estilo anterior. Vuelve a Estilos para partir de cero.';
+    document.querySelectorAll('.look').forEach((b) => {
+      b.classList.remove('is-active');
+      b.setAttribute('aria-pressed', 'false');
     });
-
-    ctrl.marks = U.toggle({
-      id: 'marks', label: 'Marcas de corte y etiqueta',
-      value: state.out.marks,
-      onChange: (v) => { state.out.marks = v; save(); }
-    });
-
-    box.appendChild(U.group('Papel', [ctrl.size.node, ctrl.mmW.node, ctrl.mmH.node, ctrl.margin.node]));
-    box.appendChild(U.group('Imagen', [ctrl.fit.node]));
-    box.appendChild(U.group('Archivo', [ctrl.dpi.node, ctrl.mirror.node, ctrl.marks.node]));
   }
 
-  function syncOut() {
-    const custom = state.out.size === 'custom';
-    ctrl.mmW.node.style.display = custom ? '' : 'none';
-    ctrl.mmH.node.style.display = custom ? '' : 'none';
-    const dpi = state.out.dpi;
-    const w = Math.round((state.out.w / 25.4) * dpi);
-    const h = Math.round((state.out.h / 25.4) * dpi);
-    const mp = ((w * h) / 1e6).toFixed(1);
-    const hint = $('#out-hint');
-    if (hint) hint.textContent = w + ' × ' + h + ' px · ' + String(mp).replace('.', ',') + ' Mpx · ' + (state.out.w + ' × ' + state.out.h) + ' mm';
-    drawRecipe();
-  }
-
-  function drawRecipe() {
-    const dl = $('#recipe-list');
-    if (!dl) return;
-    dl.textContent = '';
-    const ink = E.INK[state.neg.ink];
-    const rows = [
-      ['Modo de color', ink.mode],
-      ['Tipo de papel', 'Premium Presentation Matte'],
-      ['Carga', 'Film sobre el papel mate, cara brillante arriba'],
-      ['Calidad', 'Alta · sin alta velocidad'],
-      ['Gestión de color', 'Desactivada'],
-      ['Gamma', '2,2 · sin corrección automática'],
-      ['Escala', '100 % (sin ajustar a página)'],
-      ['Resolución', '720 ppp máx · 360 ppp suficiente'],
-      ['Tinta', ink.name + ' · ' + ink.rgb.join('/')]
-    ];
-    rows.forEach(([k, v]) => {
-      dl.appendChild(el('div', { class: 'recipe-row' }, [
-        el('dt', { text: k }),
-        el('dd', { text: v })
-      ]));
+  /* puntito en la herramienta que tiene algo puesto */
+  function paintDirty() {
+    const dirty = {
+      enfoque: state.dev.sharp || state.dev.structure || state.dev.clarity,
+      lente: state.dev.lens,
+      efectos: state.dev.grain || state.dev.vignette || state.dev.glow || state.dev.tonal ||
+        state.dev.shadows || state.dev.mids || state.dev.highs || state.dev.textura,
+      estilos: state.look.id !== 'ninguno',
+      ajustes: state.neg.black || state.neg.white !== 100 || state.neg.gamma !== 1 || state.neg.contrast,
+      negativo: !state.neg.autoDr || state.neg.ink !== DEFAULTS.neg.ink || state.neg.support !== DEFAULTS.neg.support,
+      quimica: state.proc.exposure || state.proc.toner !== 'ninguno' || state.proc.chem !== DEFAULTS.proc.chem
+    };
+    document.querySelectorAll('.tool').forEach((b) => {
+      b.classList.toggle('has-edits', !!dirty[b.dataset.tool]);
     });
   }
 
@@ -2700,8 +4294,12 @@ kbd {
         $('#file-name').textContent = imgName;
         $('#file-name').title = imgName;
         $('#drop-hint').hidden = true;
-        zoom = 1;
+        state.zoom = 1;
+        imgRev++;
+        devSig = '';
+        devCache.key = '';
         schedule();
+        if (state.tool === 'estilos') rebuildSheet();
       };
       image.onerror = () => U.toast('No he podido abrir esa imagen');
       image.src = reader.result;
@@ -2717,6 +4315,9 @@ kbd {
       imgName = 'blossfeldt · ejemplo';
       $('#file-name').textContent = 'ejemplo: Karl Blossfeldt, 1928';
       $('#drop-hint').hidden = true;
+      imgRev++;
+      devSig = '';
+      devCache.key = '';
       schedule();
     };
     image.src = url;
@@ -2734,7 +4335,7 @@ kbd {
       s.classList.toggle('is-active', s.id === 'view-' + v);
     });
     if (v === 'calibrar') { drawCalSheetPreview(); renderProfiles(); }
-    if (v === 'imprimir') { syncOut(); }
+    if (v === 'imprimir') { syncOut(); drawOutPreview(); }
     if (v === 'revelar') setTimeout(drawStage, 30);
   }
 
@@ -2807,7 +4408,6 @@ kbd {
     g.closePath();
     g.stroke();
     g.setLineDash([]);
-    // divisiones de los pasos
     const ns = calSteps();
     for (let i = 0; i <= ns; i++) {
       const u = i / ns;
@@ -2831,6 +4431,8 @@ kbd {
     });
     g.restore();
   }
+
+  let calAnalysis = null;
 
   function analyzeCal() {
     const c = $('#cal-photo');
@@ -2860,8 +4462,8 @@ kbd {
       ['mesetas', String(an.plateau)],
       ['inversiones', String(an.inversions)],
       ['ruido', an.noise.toFixed(0)]
-    ].forEach(([k, v]) => {
-      st.appendChild(el('div', { class: 'readout' }, [el('span', { class: 'ro-k', text: k }), el('b', { text: v })]));
+    ].forEach(([k2, v]) => {
+      st.appendChild(el('div', { class: 'readout' }, [el('span', { class: 'ro-k', text: k2 }), el('b', { text: v })]));
     });
     const dg = $('#cal-diagnosis');
     dg.textContent = an.warnings.length
@@ -2869,8 +4471,6 @@ kbd {
       : 'La tira se lee bien: ' + n + ' pasos monótonos, sin mesetas. Guarda el perfil y úsalo con todas tus imágenes.';
     $('#cal-name').value = $('#cal-name').value || ('Perfil ' + new Date().toLocaleDateString('es-ES'));
   }
-
-  let calAnalysis = null;
 
   function renderProfiles() {
     const box = $('#profiles');
@@ -2916,7 +4516,8 @@ kbd {
       paperW: state.out.w, paperH: state.out.h,
       margin: state.out.margin, fit: state.out.fit,
       mirror: state.out.mirror, marks: state.out.marks,
-      mix: engine.mix, label: currentLabel()
+      mix: engine.mix, label: currentLabel(),
+      develop: D.isNeutral(state.dev) ? null : state.dev
     });
   }
 
@@ -2949,9 +4550,9 @@ kbd {
     }, 24);
   }
 
-  function doExport() {
-    const btn = $('#btn-export');
-    busy(btn, 'Preparando…', (restore) => {
+  function doExport(btnEl) {
+    const btn = btnEl || $('#btn-export');
+    busy(btn, 'Revelando y preparando…', (restore) => {
       const neg = makeNegative();
       if (!neg) { restore(); return; }
       download(neg.canvas, (imgName.replace(/\.[^.]+$/, '') || 'negativo') + '-negativo-' + state.out.dpi + 'ppp.png', () => {
@@ -3008,6 +4609,132 @@ kbd {
     printCanvas(c, 210, 297);
   }
 
+  /* --------------------------------------------------------------- salida */
+  function syncOut() {
+    if (ctrl.size) {
+      const custom = state.out.size === 'custom';
+      ctrl.mmW.node.style.display = custom ? '' : 'none';
+      ctrl.mmH.node.style.display = custom ? '' : 'none';
+    }
+    const dpi = state.out.dpi;
+    const w = Math.round((state.out.w / 25.4) * dpi);
+    const h = Math.round((state.out.h / 25.4) * dpi);
+    const mp = ((w * h) / 1e6).toFixed(1).replace('.', ',');
+    const nom = PAPER_SIZES[state.out.size];
+    const h1 = $('#out-hint');
+    if (h1) h1.textContent = (state.out.size === 'custom' ? 'A medida' : nom.name.split(' · ')[0]) +
+      ' · ' + state.out.w + ' × ' + state.out.h + ' mm';
+    const h2 = $('#out-hint-2');
+    if (h2) h2.textContent = w + ' × ' + h + ' px · ' + mp + ' Mpx · ' + dpi + ' ppp';
+    drawRecipe();
+    paintChecklist();
+    if (state.view === 'imprimir') drawOutPreview();
+  }
+
+  /* Lo que hay que tener claro justo antes de darle a imprimir. */
+  function paintChecklist() {
+    const ul = $('#out-check');
+    if (!ul || !engine) return;
+    const d = engine.diag;
+    const chem = T.CHEM[state.proc.chem];
+    const margen = state.out.margin;
+    const items = [];
+
+    const falta = chem.range - d.dr;
+    if (d.capacityShort || falta > 0.03) {
+      items.push(['warn', 'La densidad no llega',
+        'La química pide ' + num(chem.range) + ' D y tu cadena entrega ' + num(d.dr) + ' D. Baja el rango en Negativo o cambia de tinta.']);
+    } else {
+      items.push(['ok', 'Densidad justa',
+        'El negativo entrega ' + num(d.dr) + ' D para los ' + num(chem.range) + ' D que pide «' + chem.name + '».']);
+    }
+    items.push(state.out.mirror
+      ? ['ok', 'Espejado', 'La tinta va contra el papel, así que la copia sale en su sitio.']
+      : ['warn', 'Sin espejar', 'Con la tinta contra el papel, la copia saldrá invertida. Actívalo en Salida.']);
+    items.push(margen >= 4
+      ? ['ok', 'Margen de ' + margen + ' mm', 'Sitio para coger la copia sin tocar la emulsión.']
+      : ['warn', 'Margen escaso', 'Con menos de 4 mm los dedos acaban en la imagen.']);
+    items.push(state.out.dpi >= 360
+      ? ['ok', state.out.dpi + ' ppp', 'A ' + state.out.dpi + ' ppp el tramado del cabezal no se ve ni con lupa sobre la copia.']
+      : ['warn', state.out.dpi + ' ppp', 'Por debajo de 360 ppp el tramado empieza a verse en la copia.']);
+    items.push(['ok', 'Escala 100 %', 'En el diálogo de impresión: sin «ajustar a la página» y sin «encajar al marco».']);
+
+    ul.textContent = '';
+    items.forEach(([cls, titulo, texto]) => {
+      ul.appendChild(el('li', { class: cls }, [
+        el('span', { class: 'mark', text: cls === 'ok' ? '✓' : '!' }),
+        el('span', {}, [el('b', { text: titulo }), document.createTextNode(texto)])
+      ]));
+    });
+  }
+
+  /* El negativo tal cual se va a imprimir: espejado, con sus marcas. */
+  function drawOutPreview() {
+    const c = $('#out-preview');
+    if (!c || !engine || !img) return;
+    const neg = R.renderNegative({
+      eng: engine, img: img, dpi: 44,
+      paperW: state.out.w, paperH: state.out.h,
+      margin: state.out.margin, fit: state.out.fit,
+      mirror: state.out.mirror, marks: false,
+      mix: engine.mix, label: '',
+      develop: D.isNeutral(state.dev) ? null : state.dev
+    });
+    c.width = neg.canvas.width;
+    c.height = neg.canvas.height;
+    const g = c.getContext('2d');
+    g.drawImage(neg.canvas, 0, 0);
+  }
+
+  function drawRecipe() {
+    const dl = $('#recipe-list');
+    if (!dl) return;
+    dl.textContent = '';
+    const ink = E.INK[state.neg.ink];
+    const rows = [
+      ['Modo de color', ink.mode],
+      ['Tipo de papel', 'Premium Presentation Matte'],
+      ['Carga', 'Film sobre el papel mate, cara brillante arriba'],
+      ['Calidad', 'Alta · sin alta velocidad'],
+      ['Gestión de color', 'Desactivada'],
+      ['Gamma', '2,2 · sin corrección automática'],
+      ['Escala', '100 % (sin ajustar a página)'],
+      ['Resolución', '720 ppp máx · 360 ppp suficiente'],
+      ['Tinta', ink.name + ' · ' + ink.rgb.join('/')]
+    ];
+    rows.forEach(([k, v]) => {
+      dl.appendChild(el('div', { class: 'recipe-row' }, [
+        el('dt', { text: k }),
+        el('dd', { text: v })
+      ]));
+    });
+  }
+
+  /* ------------------------------------------------------------ historial UI */
+  function paintStack() {
+    const p = $('#stackpanel');
+    p.textContent = '';
+    p.appendChild(el('p', { class: 'stack-title', text: 'Historial' }));
+    if (hist.length <= 1) {
+      p.appendChild(el('p', { class: 'stack-empty', text: 'Aún no has tocado nada. Cada ajuste aparecerá aquí y se puede volver a él.' }));
+      return;
+    }
+    hist.forEach((h, i) => {
+      const b = el('button', {
+        class: 'stack-item' + (i === histIdx ? ' is-current' : '') + (i > histIdx ? ' is-future' : '')
+      }, [
+        el('span', { class: 'stack-dot' }),
+        el('span', { text: (i === 0 ? 'Estado inicial' : h.label) }),
+        el('span', { class: 'stack-time', text: new Date(h.t).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) })
+      ]);
+      b.addEventListener('click', () => {
+        histIdx = i;
+        applySnap(hist[i].s);
+      });
+      p.appendChild(b);
+    });
+  }
+
   /* ------------------------------------------------------------- eventos */
   function bind() {
     document.querySelectorAll('.tab').forEach((t) => {
@@ -3026,10 +4753,71 @@ kbd {
     document.querySelectorAll('#mode-seg button').forEach((b) => {
       b.addEventListener('click', () => {
         state.mode = b.dataset.mode;
+        state.raw = false;
         document.querySelectorAll('#mode-seg button').forEach((x) => x.classList.toggle('is-active', x === b));
         drawStage();
       });
     });
+
+    $('#btn-undo').addEventListener('click', undo);
+    $('#btn-redo').addEventListener('click', redo);
+    $('#sheet-back').addEventListener('click', () => openTool(null));
+    $('#sheet-reset').addEventListener('click', () => {
+      const id = state.tool;
+      if (!id) return;
+      if (id === 'enfoque' || id === 'lente' || id === 'efectos') {
+        const d = D.defaults();
+        if (id === 'efectos') {
+          ['grain', 'grainSize', 'textura', 'texturaTipo', 'vignette', 'vignetteMid', 'glow', 'glowWarm', 'tonal', 'shadows', 'mids', 'highs'].forEach((k) => { state.dev[k] = d[k]; });
+        } else if (id === 'lente') {
+          ['lens', 'lensTrans', 'lensY', 'lensSize', 'lensBokeh'].forEach((k) => { state.dev[k] = d[k]; });
+        } else {
+          ['sharp', 'radius', 'threshold', 'structure', 'clarity'].forEach((k) => { state.dev[k] = d[k]; });
+        }
+        state.look.id = 'personalizado';
+      } else if (id === 'estilos') {
+        applyLook('ninguno');
+        return;
+      } else if (id === 'ajustes') {
+        Object.assign(state.neg, { black: 0, white: 100, gamma: 1, contrast: 0, mix: 'neutro' });
+      } else if (id === 'negativo') {
+        Object.assign(state.neg, { dr: T.CHEM[state.proc.chem].range, autoDr: true });
+      } else if (id === 'quimica') {
+        Object.assign(state.proc, { exposure: 0, toner: 'ninguno', oxidation: 1, texture: 0.35 });
+      } else if (id === 'ver') {
+        state.zoom = 1;
+        state.raw = false;
+      }
+      pushHistory('Reiniciar ' + id);
+      devSig = '';
+      save();
+      rebuildSheet();
+      buildEngine();
+      drawStage();
+      renderReadouts();
+      syncHints();
+      U.toast('Reiniciado');
+    });
+
+    const stackBtn = $('#btn-stack');
+    const stackPanel = $('#stackpanel');
+    stackBtn.addEventListener('click', () => {
+      const on = stackPanel.hidden;
+      stackPanel.hidden = !on;
+      stackBtn.setAttribute('aria-expanded', on ? 'true' : 'false');
+      if (on) paintStack();
+    });
+
+    // comparar: mantener pulsado
+    const cmp = $('#btn-compare');
+    const cmpOn = () => { if (!img) return; state.raw = true; cmp.classList.add('is-on'); drawStage(); };
+    const cmpOff = () => { if (!state.raw) return; state.raw = false; cmp.classList.remove('is-on'); drawStage(); };
+    cmp.addEventListener('pointerdown', (e) => { e.preventDefault(); cmpOn(); });
+    cmp.addEventListener('pointerup', cmpOff);
+    cmp.addEventListener('pointerleave', cmpOff);
+    cmp.addEventListener('pointercancel', cmpOff);
+    cmp.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); cmpOn(); } });
+    cmp.addEventListener('keyup', cmpOff);
 
     const ground = $('#ground');
     ['dragenter', 'dragover'].forEach((ev) => ground.addEventListener(ev, (e) => {
@@ -3044,6 +4832,46 @@ kbd {
       const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
       if (f) loadFile(f);
     });
+
+    /* Arrastre sobre la foto: ajusta el control armado.
+       Vertical, como en Snapseed: subir sube el valor. */
+    let dragCtl = null;
+    let dragY = 0;
+    let dragVal = 0;
+    ground.addEventListener('pointerdown', (e) => {
+      if (!armed || !img) return;
+      if (e.target.closest('.drag-pill')) return;
+      dragCtl = armed;
+      dragY = e.clientY;
+      dragVal = armed.value();
+      ground.classList.add('is-adjusting');
+      $('.drag-pill').hidden = false;
+      if (ground.setPointerCapture) {
+        try { ground.setPointerCapture(e.pointerId); } catch { /* captura no disponible */ }
+      }
+      e.preventDefault();
+    });
+    ground.addEventListener('pointermove', (e) => {
+      if (!dragCtl) return;
+      const range = dragCtl.max - dragCtl.min;
+      const dy = dragY - e.clientY;
+      const sens = e.shiftKey ? 1400 : 340;      // ⇧ = ajuste fino
+      const v = dragVal + (dy / sens) * range;
+      dragCtl.set(v);
+      paintPill();
+      fast = true;
+      schedule();
+    });
+    const endDrag = () => {
+      if (!dragCtl) return;
+      dragCtl = null;
+      ground.classList.remove('is-adjusting');
+      fast = false;
+      schedule();
+    };
+    ground.addEventListener('pointerup', endDrag);
+    ground.addEventListener('pointercancel', endDrag);
+    ground.addEventListener('pointerleave', endDrag);
 
     document.addEventListener('paste', (e) => {
       const items = e.clipboardData && e.clipboardData.items;
@@ -3060,14 +4888,33 @@ kbd {
     document.addEventListener('keydown', (e) => {
       const t = e.target;
       const typing = t && (t.tagName === 'INPUT' || t.tagName === 'SELECT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
-      if (typing && !e.metaKey && !e.ctrlKey) return;
       const meta = e.metaKey || e.ctrlKey;
-      if (meta && e.key.toLowerCase() === 'o') { e.preventDefault(); $('#file-input').click(); }
-      else if (meta && e.key.toLowerCase() === 's') { e.preventDefault(); doExport(); }
-      else if (meta && e.key.toLowerCase() === 'p') { e.preventDefault(); doPrint(); }
-      else if (e.key === '1') setView('revelar');
+      if (typing && !meta) return;
+
+      if (meta && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) redo(); else undo();
+        return;
+      }
+      if (meta && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); return; }
+      if (meta && e.key.toLowerCase() === 'o') { e.preventDefault(); $('#file-input').click(); return; }
+      if (meta && e.key.toLowerCase() === 's') { e.preventDefault(); doExport(); return; }
+      if (meta && e.key.toLowerCase() === 'p') { e.preventDefault(); doPrint(); return; }
+      if (e.key === 'Escape') {
+        if (!$('#stackpanel').hidden) { $('#stackpanel').hidden = true; return; }
+        if (state.tool) { openTool(null); return; }
+      }
+      if (e.key === '1') setView('revelar');
       else if (e.key === '2') setView('calibrar');
       else if (e.key === '3') setView('imprimir');
+      else if (armed && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+        // con un control armado, las flechas ajustan ese control
+        if (typing) return;
+        e.preventDefault();
+        const d = (e.shiftKey ? 0.2 : 1) * armed.step;
+        armed.set(armed.value() + (e.key === 'ArrowUp' ? d : -d));
+        paintPill();
+      }
     });
 
     // calibración
@@ -3111,6 +4958,7 @@ kbd {
       });
       profiles.push(prof);
       state.calib = prof;
+      engHash = '';
       save();
       renderProfiles();
       schedule();
@@ -3120,9 +4968,9 @@ kbd {
       U.toast('Método manual: usa el paso 1 y anota dónde sale blanco y negro pleno');
     });
 
-    // arrastre de esquinas
+    // arrastre de esquinas de la tira
     const photo = $('#cal-photo');
-    let drag = -1;
+    let dragIdx = -1;
     const hit = (x, y) => {
       for (let i = 0; i < calQuad.length; i++) {
         const d = Math.hypot(calQuad[i][0] - x, calQuad[i][1] - y);
@@ -3137,23 +4985,30 @@ kbd {
     photo.addEventListener('pointerdown', (e) => {
       if (!calQuad) return;
       const p = pos(e);
-      drag = hit(p[0], p[1]);
-      if (drag >= 0) { photo.setPointerCapture(e.pointerId); e.preventDefault(); }
+      dragIdx = hit(p[0], p[1]);
+      if (dragIdx >= 0) { photo.setPointerCapture(e.pointerId); e.preventDefault(); }
     });
     photo.addEventListener('pointermove', (e) => {
-      if (drag < 0 || !calQuad) return;
+      if (dragIdx < 0 || !calQuad) return;
       const p = pos(e);
-      calQuad[drag] = p;
+      calQuad[dragIdx] = p;
       paintCalQuad();
     });
     photo.addEventListener('pointerup', (e) => {
-      if (drag >= 0 && photo.releasePointerCapture) {
-        try { photo.releasePointerCapture(e.pointerId); } catch { /* nada */ }
+      if (dragIdx >= 0 && photo.releasePointerCapture) {
+        try { photo.releasePointerCapture(e.pointerId); } catch { /* ya se soltó */ }
       }
-      drag = -1;
+      dragIdx = -1;
     });
 
     // salida
+    const goto = $('#btn-goto-salida');
+    if (goto) {
+      goto.addEventListener('click', () => {
+        setView('revelar');
+        openTool('salida');
+      });
+    }
     $('#btn-export').addEventListener('click', doExport);
     $('#btn-print').addEventListener('click', doPrint);
     $('#btn-ruler').addEventListener('click', doRuler);
@@ -3168,10 +5023,10 @@ kbd {
     });
 
     // zoom con rueda sobre el escenario
-    $('#ground').addEventListener('wheel', (e) => {
+    ground.addEventListener('wheel', (e) => {
       if (!e.altKey) return;
       e.preventDefault();
-      zoom = Math.max(0.5, Math.min(3, zoom * (e.deltaY > 0 ? 0.94 : 1.06)));
+      state.zoom = Math.max(0.5, Math.min(3, state.zoom * (e.deltaY > 0 ? 0.94 : 1.06)));
       drawStage();
     }, { passive: false });
   }
@@ -3179,17 +5034,18 @@ kbd {
   /* ------------------------------------------------------------------ init */
   function init() {
     restore();
-    buildNegPanel();
-    buildPrintPanel();
-    buildOutPanel();
+    buildRail();
     bind();
-    buildEngine();
+    buildEngine(true);
     syncOut();
     drawRecipe();
     loadSample();
     $('#drop-hint').hidden = true;
     renderProfiles();
     if (!img) $('#drop-hint').hidden = false;
+    hist = [];
+    histIdx = -1;
+    pushHistory('Estado inicial');
   }
 
   window.__prusia = {
@@ -3197,9 +5053,14 @@ kbd {
     engine: () => engine,
     negative: () => makeNegative(),
     profiles: () => profiles,
+    hist: () => ({ i: histIdx, n: hist.length, labels: hist.map((h) => h.label) }),
+    undo: undo,
+    redo: redo,
+    openTool: openTool,
+    applyLook: applyLook,
     /* repintado síncrono: la app va por rAF y las pestañas en segundo plano
        no lo reciben, así que las pruebas necesitan forzarlo */
-    redraw: () => { buildEngine(); drawStage(); renderReadouts(); syncHints(); }
+    redraw: () => { engHash = ''; buildEngine(); drawStage(); renderReadouts(); syncHints(); }
   };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

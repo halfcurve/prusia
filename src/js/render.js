@@ -76,12 +76,14 @@
 
   /* ---------- preview ---------- */
   /* Dibuja el papel completo con su margen y, dentro, la imagen procesada.
-     opt: { eng, img, mode, w, h, fit, zoom, texture, mix, margin(mm), paperBox } */
+     opt: { eng, img, mode, w, h, fit, zoom, texture, mix, margin, develop,
+            devKey, quality, cache } */
   function drawPreview(canvas, opt) {
     const eng = opt.eng;
     if (!eng || !opt.img) return;
     const img = opt.img;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const q = opt.quality == null ? 1 : Math.max(0.3, Math.min(1, opt.quality));
+    const dpr = Math.min(2, (window.devicePixelRatio || 1)) * q;
     const cw = Math.max(40, Math.round(opt.w));
     const ch = Math.max(40, Math.round(opt.h));
     const W = Math.max(48, Math.round(cw * dpr));
@@ -104,7 +106,28 @@
     const ix = padX, iy = padY, iw = Math.max(8, W - padX * 2), ih = Math.max(8, H - padY * 2);
     const src = makeSourceCanvas(img, iw, ih, opt.fit, 0, 0, opt.zoom);
     const sg = src.getContext('2d', { willReadFrequently: true });
-    const data = sg.getImageData(0, 0, iw, ih);
+
+    /* revelado (enfoque, desenfoque, efectos): se aplica sobre los píxeles ya
+       colocados en el papel, así el radio se mide siempre en píxeles de salida.
+       Se cachea por parámetros y tamaño: mover un mando de química no vuelve a
+       revelar lo que no ha cambiado. */
+    const cache = opt.cache;
+    const cacheKey = opt.devKey
+      ? opt.devKey + '|' + iw + 'x' + ih + '|' + opt.fit + '|' + (opt.zoom || 1) + '|' + q
+      : null;
+    let data;
+    if (cache && cacheKey && cache.key === cacheKey && cache.data &&
+      cache.data.width === iw && cache.data.height === ih) {
+      data = cache.data;
+      sg.putImageData(data, 0, 0);
+    } else {
+      data = sg.getImageData(0, 0, iw, ih);
+      if (opt.develop && !P.develop.isNeutral(opt.develop)) {
+        P.develop.apply(data.data, iw, ih, opt.develop);
+        sg.putImageData(data, 0, 0);
+      }
+      if (cache && cacheKey) { cache.key = cacheKey; cache.data = data; }
+    }
     const px = data.data;
     const out = new Uint32Array(px.buffer, 0, iw * ih);
 
@@ -186,6 +209,10 @@
     const src = makeSourceCanvas(img, Math.max(1, inW), Math.max(1, inH), opt.fit, 0, 0, opt.zoom || 1);
     const sg = src.getContext('2d', { willReadFrequently: true });
     const d = sg.getImageData(0, 0, src.width, src.height);
+    if (opt.develop && !P.develop.isNeutral(opt.develop)) {
+      P.develop.apply(d.data, src.width, src.height, opt.develop);
+      sg.putImageData(d, 0, 0);
+    }
     const px = d.data;
     const n = src.width * src.height;
     const out = new Uint32Array(px.buffer, 0, n);

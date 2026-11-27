@@ -2,9 +2,9 @@
 <html lang="es" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Prusia — negativos para cianotipia</title>
-<meta name="description" content="Taller digital de negativos para cianotipia: prepara el negativo para tu impresora y mira cómo quedará la copia antes de exponer.">
+<meta name="description" content="Taller digital de negativos para cianotipia: revela la foto, prepárala para tu impresora y mira cómo quedará la copia antes de exponer.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#121110">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c406b'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23cfe2ee' opacity='.9'/%3E%3C/svg%3E">
@@ -38,51 +38,76 @@
 
   <!-- ============================ REVELAR ============================ -->
   <section class="view view-revelar is-active" id="view-revelar" role="tabpanel" aria-label="Revelar">
-    <aside class="panel panel-neg" aria-label="Ajustes del negativo">
-      <div class="panel-head">
-        <h2>Negativo</h2>
-        <p class="panel-sub">Lo que se imprime</p>
-      </div>
-      <div class="panel-body" id="controls-neg"></div>
-    </aside>
+    <div class="studio">
 
-    <div class="stage" id="stage">
-      <div class="stage-bar">
-        <div class="segmented" id="mode-seg" role="group" aria-label="Qué se muestra">
-          <button data-mode="print" class="is-active">Cianotipia</button>
-          <button data-mode="neg">Negativo</button>
-          <button data-mode="orig">Original</button>
-          <button data-mode="side">Lado a lado</button>
-        </div>
-        <div class="stage-meta" id="stage-meta">A4 · 210 × 297 mm</div>
-      </div>
-
-      <div class="stage-ground" id="ground">
-        <div class="paper" id="paper">
-          <canvas id="cv-main" width="10" height="10"></canvas>
-          <div class="paper-edge" aria-hidden="true"></div>
-        </div>
-        <div class="drop-hint" id="drop-hint">
-          <div class="drop-inner">
-            <p class="drop-title">Arrastra una foto aquí</p>
-            <p class="drop-sub">o pulsa <kbd>⌘</kbd><kbd>O</kbd> para abrir · también puedes pegar con <kbd>⌘</kbd><kbd>V</kbd></p>
+      <div class="stage" id="stage">
+        <div class="stage-bar">
+          <div class="segmented" id="mode-seg" role="group" aria-label="Qué se muestra">
+            <button data-mode="print" class="is-active">Cianotipia</button>
+            <button data-mode="neg">Negativo</button>
+            <button data-mode="orig">Foto</button>
+            <button data-mode="side">Lado a lado</button>
+          </div>
+          <div class="stage-meta" id="stage-meta">A4 · 210 × 297 mm</div>
+          <div class="stage-acts">
+            <button class="iconbtn" id="btn-undo" title="Deshacer (⌘Z)" aria-label="Deshacer" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7H5v3"/><path d="M5.5 9.5A7 7 0 1 1 12 19"/></svg>
+            </button>
+            <button class="iconbtn" id="btn-redo" title="Rehacer (⇧⌘Z)" aria-label="Rehacer" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 7h3v3"/><path d="M18.5 9.5A7 7 0 1 0 12 19"/></svg>
+            </button>
+            <button class="iconbtn" id="btn-compare" title="Mantén para ver la foto original" aria-label="Comparar con la original">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 5v14"/></svg>
+            </button>
+            <button class="iconbtn" id="btn-stack" title="Historial de ajustes" aria-label="Historial de ajustes" aria-expanded="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 2"/></svg>
+            </button>
           </div>
         </div>
+
+        <div class="stage-ground" id="ground">
+          <div class="paper" id="paper">
+            <canvas id="cv-main" width="10" height="10"></canvas>
+            <div class="paper-edge" aria-hidden="true"></div>
+          </div>
+          <div class="drop-hint" id="drop-hint">
+            <div class="drop-inner">
+              <p class="drop-title">Arrastra una foto aquí</p>
+              <p class="drop-sub">o pulsa <kbd>⌘</kbd><kbd>O</kbd> para abrir · también puedes pegar con <kbd>⌘</kbd><kbd>V</kbd></p>
+            </div>
+          </div>
+          <div class="drag-pill" id="drag-pill" hidden>
+            <span class="dp-k" id="dp-k">Nitidez</span>
+            <span class="dp-v" id="dp-v">0</span>
+          </div>
+        </div>
+
+        <div class="stackpanel" id="stackpanel" hidden></div>
+
+        <div class="stage-foot">
+          <div class="readouts" id="readouts"></div>
+          <div class="warnings" id="warnings" role="status" aria-live="polite"></div>
+        </div>
       </div>
 
-      <div class="stage-foot">
-        <div class="readouts" id="readouts"></div>
-        <div class="warnings" id="warnings" role="status" aria-live="polite"></div>
+      <div class="tray" id="tray">
+        <div class="tray-rail" id="tray-rail" role="toolbar" aria-label="Herramientas"></div>
       </div>
+
+      <div class="tray-sheet" id="tray-sheet" hidden>
+          <div class="sheet-head">
+            <button class="sheet-back" id="sheet-back" aria-label="Volver a herramientas">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 6l-6 6 6 6"/></svg>
+            </button>
+            <h2 class="sheet-title" id="sheet-title">Enfoque</h2>
+            <p class="sheet-note" id="sheet-note"></p>
+            <div class="sheet-alert" id="sheet-alert" hidden></div>
+            <button class="sheet-reset" id="sheet-reset">Reiniciar</button>
+          </div>
+          <div class="sheet-body" id="sheet-body"></div>
+        </div>
+
     </div>
-
-    <aside class="panel panel-print" aria-label="Ajustes de la cianotipia">
-      <div class="panel-head">
-        <h2>Cianotipia</h2>
-        <p class="panel-sub">Lo que va a salir</p>
-      </div>
-      <div class="panel-body" id="controls-print"></div>
-    </aside>
   </section>
 
   <!-- ============================ CALIBRAR ============================ -->
@@ -105,9 +130,9 @@
               <select class="select" id="in-calsteps">
                 <option value="21">21 · se lee a ojo</option>
                 <option value="51">51 · foto con buena luz</option>
-                <option value="101">101 · sólo escaneada</option>
+                <option value="101">101 · foto buena o escáner</option>
               </select>
-              <p class="ctl-hint">Con 21 sobra para empezar. Las tablas de 101-256 pasos son las de Easy Digital Negatives: más finas, y piden que la tira llene el encuadre o un escáner.</p>
+              <p class="ctl-hint">21 sobra para empezar. Easy Digital Negatives ofrece 101 y 256 parches y recomienda 256: más finos, y piden escáner o que la tira llene el encuadre. La app se queda en 101 porque por encima de eso el límite ya no es la tabla, es la cámara con la que fotografías la copia.</p>
             </div>
             <div class="step-actions">
               <button class="btn btn-primary" id="btn-cal-sheet">Abrir la carta</button>
@@ -169,13 +194,20 @@
           <h2>El negativo, a tamaño exacto</h2>
           <p class="lede">Se genera a la resolución que pidas y con el tamaño físico en milímetros. Nada de «ajustar a la página»: si la escala se va un 3 %, la copia no coincide nunca.</p>
         </header>
-        <div class="panel-body panel-body-flat" id="controls-out"></div>
+        <figure class="out-card">
+          <div class="out-shot"><canvas id="out-preview" width="10" height="10"></canvas></div>
+          <figcaption>
+            <p class="out-dims" id="out-hint">A4 · 210 × 297 mm</p>
+            <p class="out-sub" id="out-hint-2"></p>
+          </figcaption>
+        </figure>
         <div class="out-actions">
           <button class="btn btn-primary" id="btn-export">Guardar negativo (PNG)</button>
           <button class="btn btn-quiet" id="btn-print">Imprimir…</button>
           <button class="btn btn-quiet" id="btn-ruler">Probar escala</button>
         </div>
-        <p class="step-note" id="out-hint"></p>
+        <p class="step-note">Tamaño, resolución, margen y espejo se ajustan en <button class="linkbtn" id="btn-goto-salida">Salida</button>, dentro de Revelar. Aquí sólo se genera el archivo.</p>
+        <ul class="checklist" id="out-check"></ul>
       </div>
 
       <div class="col">
@@ -186,11 +218,12 @@
           <h3 class="mt">Orden de trabajo</h3>
           <ol class="recipe-steps">
             <li>Imprime el negativo sobre film. Deja secar una hora antes de tocarlo: la tinta fresca se corre.</li>
-            <li>Sensibiliza el papel en penumbra y sécalo a oscuras. Mezcla A+B justo antes: aguanta 2-4 h.</li>
+            <li>Sensibiliza el papel en penumbra y sécalo a oscuras. Con el kit Jacquard, A y B a partes iguales y mézclalas justo antes: la mezcla de trabajo aguanta 2-4 h.</li>
             <li>Coloca el negativo con la tinta <strong>contra</strong> el papel y expón. Clásica 3-8 min al sol (2-4 min lámpara UV 365); kit Jacquard 10-20 min. Pasarse es mejor que quedarse corto: si sale velado baja el tiempo a la mitad, si sale corto duplícalo.</li>
             <li>Revela en agua corriente 5 min hasta que salga limpia. Una gota de agua oxigenada lo azula al instante; si no, sube solo en 24 h.</li>
             <li>Para virar: blanquea en carbonato sódico (1-2 cucharaditas por litro, menos de 5 min) hasta amarillo dorado, aclara y baña en ácido tánico al 2 % o té de 2 a 24 h.</li>
           </ol>
+          <p class="recipe-fine">Las cifras de densidad del soporte y de bloqueo por tinta son mediciones propias sobre la ET-2865, no de Jacquard ni de Easy Digital Negatives. Ver <code>research/</code>.</p>
         </div>
       </div>
     </div>

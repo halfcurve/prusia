@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(here, '..', 'src', 'js');
-export const FILES = ['sci.js', 'tone.js', 'engine.js', 'calibrate.js', 'sheets.js'];
+export const FILES = ['sci.js', 'tone.js', 'engine.js', 'calibrate.js', 'sheets.js', 'develop.js'];
 
 export function loadP() {
   const ctx = {
