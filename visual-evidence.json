@@ -10,7 +10,7 @@
     },
     {
       "path": "src/styles.css",
-      "sha256": "b0758bf9de62745dd93adf4f18e891afaff51510fd6c9853c628861abaa8dc8b"
+      "sha256": "ef37e3c5f5bdc29f074dd29572995fe55b535c683d2b04bc96ee8f537db50a06"
     },
     {
       "path": "src/js/sci.js",
@@ -42,7 +42,7 @@
     },
     {
       "path": "src/js/app.js",
-      "sha256": "3b65a866e1afc7bb0c3bcfbc1bcd796c3c78ff33d47c5fe45b20af4a4259955c"
+      "sha256": "63c57e13fcb15e7f1f90e96ad58e573b65057bfd9292863b183d1b44a1d8384f"
     }
   ],
   "requiredChecks": [
@@ -91,7 +91,7 @@
         {
           "path": "evidence/e1-revelar.png",
           "kind": "image",
-          "sha256": "5b4e8d876dd64d3a8ab3d411b8ef14a3b8207910186f79cac88e3756a70b4364"
+          "sha256": "49648ac9b9995594605c4d9ef71cae443f3a84db6486f184c87a99b4ee65c63c"
         }
       ]
     },
@@ -205,7 +205,7 @@
         {
           "path": "evidence/e1-revelar.png",
           "kind": "image",
-          "sha256": "5b4e8d876dd64d3a8ab3d411b8ef14a3b8207910186f79cac88e3756a70b4364"
+          "sha256": "49648ac9b9995594605c4d9ef71cae443f3a84db6486f184c87a99b4ee65c63c"
         }
       ],
       "steps": [

@@ -102,7 +102,7 @@
   function drawStage() {
     const canvas = $('#cv-main');
     const paper = $('#paper');
-    if (!engine || !img) { paper.classList.remove('is-ready'); return; }
+    if (!engine || !img) return;
     const box = groundBox();
     const ar = state.out.w / state.out.h;
     let cw = box.w, ch = cw / ar;
@@ -113,7 +113,6 @@
     paper.style.height = ch + 'px';
     paper.style.setProperty('--paper', '#' + [engine.diag.paperTint.r, engine.diag.paperTint.g, engine.diag.paperTint.b]
       .map((v) => Math.round(v).toString(16).padStart(2, '0')).join(''));
-    paper.classList.add('is-ready');
     R.drawPreview(canvas, {
       eng: engine, img: img, mode: state.mode,
       w: cw, h: ch, fit: state.out.fit, zoom: zoom,

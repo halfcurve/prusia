@@ -266,9 +266,8 @@ body {
   box-shadow: var(--shadow-paper);
   transition: background 0.25s var(--ease);
   display: grid; place-items: center;
-  opacity: 0; transition: opacity 0.4s var(--ease), background 0.25s var(--ease);
+  transition: background 0.25s var(--ease);
 }
-.paper.is-ready { opacity: 1; }
 .paper canvas { display: block; max-width: 100%; max-height: 100%; width: 100%; height: 100%; }
 .paper-edge { position: absolute; inset: 0; pointer-events: none; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.10) inset; }
 
