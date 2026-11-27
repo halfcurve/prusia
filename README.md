@@ -4,6 +4,8 @@ Taller digital de negativos para **cianotipia**, pensado para una **Epson EcoTan
 y para la química real del proceso. Prepara el negativo a tamaño exacto y enseña cómo
 quedará la copia antes de gastar papel.
 
+[**Abrir el taller: halfcurve.github.io/prusia**](https://halfcurve.github.io/prusia) — sin instalar nada, también en el móvil.
+
 No es un filtro de «invertir y listo»: el negativo sale en **color** (amarillo dominante),
 porque en esta impresora el negro de tinta *dye* es el peor bloqueador de UV que hay.
 
@@ -13,7 +15,7 @@ porque en esta impresora el negro de tinta *dye* es el peor bloqueador de UV que
 ./abrir.sh            # sirve en http://127.0.0.1:8123 y abre el navegador
 ```
 
-o directamente `dist/index.html` (es un archivo único, sin red, sin dependencias).
+o directamente `docs/index.html` (es un archivo único, sin red, sin dependencias).
 
 ## Qué hace
 
@@ -54,7 +56,8 @@ Sin dependencias: HTML, CSS y JS que el navegador ejecuta tal cual.
 | `src/js/ui.js` | Controles (slider, select, swatches, toggle, número) |
 | `src/js/app.js` | Estado, eventos, vistas, exportación e impresión |
 | `src/styles.css` | Sistema de diseño: un acento, cuatro grises cálidos, una escala de radios |
-| `build.mjs` | Junta todo en `dist/index.html` (`node build.mjs`) |
+| `build.mjs` | Junta todo en `docs/index.html` (`node build.mjs`) |
+| `docs/` | Lo que sirve GitHub Pages: es el HTML autónomo ya construido |
 
 `tools/` tiene el cargador para Node (`load.mjs`), la inspección de la LUT (`lut-peek.mjs`)
 y el ajuste del pigmento contra anclas medidas (`fit-pigment.mjs`).

@@ -1,6 +1,6 @@
 /* build.mjs — junta todo en un único HTML autónomo.
  * Sin dependencias: node build.mjs
- * El resultado (dist/index.html) abre desde file:// y desde http://.
+ * El resultado (docs/index.html) abre desde file:// y desde http://.
  */
 import fs from 'fs';
 import path from 'path';
@@ -23,7 +23,7 @@ const prelude = `<script>window.P={};P.SAMPLE=${JSON.stringify(sample)};</script
 html = html.replace('<!--@css-->', '<style>\n' + css + '\n</style>');
 html = html.replace('<!--@js-->', prelude + '\n<script>\n' + js + '\n</script>');
 
-fs.mkdirSync(path.join(ROOT, 'dist'), { recursive: true });
-fs.writeFileSync(path.join(ROOT, 'dist/index.html'), html);
-const kb = (fs.statSync(path.join(ROOT, 'dist/index.html')).size / 1024).toFixed(0);
-console.log('dist/index.html · ' + kb + ' KB');
+fs.mkdirSync(path.join(ROOT, 'docs'), { recursive: true });
+fs.writeFileSync(path.join(ROOT, 'docs/index.html'), html);
+const kb = (fs.statSync(path.join(ROOT, 'docs/index.html')).size / 1024).toFixed(0);
+console.log('docs/index.html · ' + kb + ' KB');
