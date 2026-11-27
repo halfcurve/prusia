@@ -520,23 +520,20 @@
     api.body.appendChild(note);
     api.body.appendChild(api.wide(U.group(null, [strength.node])));
 
-    // miniaturas reales: revelado del estilo + química elegida
+    /* Miniaturas reales: se revela un recorte con el estilo y la química
+       elegida. Las ocho cuestan unos 30 ms, así que van de una tirada: hacerlo
+       por fotogramas dejaba huecos si la pestaña estaba en segundo plano
+       (requestAnimationFrame no corre ahí) y no ganaba nada. */
     const src = thumbSource();
     const eng = engine;
-    let i = 0;
-    const step = () => {
-      if (i >= P.looks.LIST.length) return;
-      const look = P.looks.LIST[i++];
-      const btn = badges[look.id];
-      const cv = btn.querySelector('canvas');
-      const th = P.looks.thumb(src, P.looks.paramsFor(look.id, 1), eng, 78 * 2);
+    if (!src) return;
+    P.looks.LIST.forEach((look) => {
+      const cv = badges[look.id].querySelector('canvas');
+      const th = P.looks.thumb(src, P.looks.paramsFor(look.id, 1), eng, cv.width);
       const g2 = cv.getContext('2d');
       g2.clearRect(0, 0, cv.width, cv.height);
-      if (th.width >= cv.width) g2.drawImage(th, 0, 0, cv.width, cv.height);
-      else g2.drawImage(th, 0, 0);
-      requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
+      g2.drawImage(th, 0, 0, cv.width, cv.height);
+    });
   };
 
   function thumbSource() {
@@ -1785,6 +1782,12 @@
     $('#btn-export').addEventListener('click', doExport);
     $('#btn-print').addEventListener('click', doPrint);
     $('#btn-ruler').addEventListener('click', doRuler);
+
+    /* Al volver a la pestaña, el lienzo puede haberse quedado con la medida
+       de antes: se repinta al hacerse visible. */
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && state.view === 'revelar') drawStage();
+    });
 
     window.addEventListener('resize', () => {
       if (state.view === 'revelar') drawStage();
