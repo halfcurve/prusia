@@ -363,7 +363,7 @@ Nadie ha construido **el "Darktable del negativo digital"**: abierto, medible, r
     {
       "id": "criterion-1",
       "status": "satisfied",
-      "evidence": "Informe en español escrito en /Users/cvlma/Documents/Cvlma/App/cianotipia/research/prior-art.md con 5 secciones de investigación, tabla comparativa, algoritmo de linearización paso a paso, contradicciones, evidencia ausente, fuentes y sección final 'QUE HACER MEJOR QUE ELLOS'."
+      "evidence": "Informe en español escrito en research/prior-art.md con 5 secciones de investigación, tabla comparativa, algoritmo de linearización paso a paso, contradicciones, evidencia ausente, fuentes y sección final 'QUE HACER MEJOR QUE ELLOS'."
     }
   ],
   "changedFiles": [
