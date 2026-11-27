@@ -8,7 +8,7 @@ set -u
 cd "$(dirname "$0")" || exit 1
 
 GH="$HOME/.pi/bin/gh"
-DUEÑO="halfcurve"
+OWNER="halfcurve"
 REPO="prusia"
 DESCRIPCION="Taller de negativos para cianotipia con simulacion espectral"
 
@@ -18,24 +18,24 @@ if ! "$GH" auth status >/dev/null 2>&1; then
 fi
 
 # 1. El repo
-if "$GH" repo view "$DUEÑO/$REPO" >/dev/null 2>&1; then
-  echo "· el repo $DUEÑO/$REPO ya existe"
+if "$GH" repo view "$OWNER/$REPO" >/dev/null 2>&1; then
+  echo "· el repo $OWNER/$REPO ya existe"
 else
-  echo "· creo $DUEÑO/$REPO"
+  echo "· creo $OWNER/$REPO"
   "$GH" repo create "$REPO" --public --description "$DESCRIPCION" || exit 1
 fi
 
 # 2. El código
 echo "· empujo main"
-git remote set-url origin "https://github.com/$DUEÑO/$REPO.git"
+git remote set-url origin "https://github.com/$OWNER/$REPO.git"
 git push -u origin main || exit 1
 
 # 3. Pages sobre /docs, que es donde build.mjs deja el HTML autónomo
 echo "· enciendo Pages"
 JSON='{"source":{"branch":"main","path":"/docs"}}'
-if echo "$JSON" | "$GH" api -X POST "repos/$DUEÑO/$REPO/pages" --input - >/dev/null 2>&1; then
+if echo "$JSON" | "$GH" api -X POST "repos/$OWNER/$REPO/pages" --input - >/dev/null 2>&1; then
   echo "  Pages creado"
-elif echo "$JSON" | "$GH" api -X PUT "repos/$DUEÑO/$REPO/pages" --input - >/dev/null 2>&1; then
+elif echo "$JSON" | "$GH" api -X PUT "repos/$OWNER/$REPO/pages" --input - >/dev/null 2>&1; then
   echo "  Pages ya existía: actualizado"
 else
   echo "  no se pudo configurar Pages (hazlo a mano: Settings → Pages → main /docs)"
@@ -43,9 +43,9 @@ fi
 
 # 4. Dónde queda
 sleep 2
-URL=$("$GH" api "repos/$DUEÑO/$REPO/pages" --jq '.html_url' 2>/dev/null)
-ESTADO=$("$GH" api "repos/$DUEÑO/$REPO/pages" --jq '.status' 2>/dev/null)
+URL=$("$GH" api "repos/$OWNER/$REPO/pages" --jq '.html_url' 2>/dev/null)
+ESTADO=$("$GH" api "repos/$OWNER/$REPO/pages" --jq '.status' 2>/dev/null)
 echo
-echo "  repo:  https://github.com/$DUEÑO/$REPO"
+echo "  repo:  https://github.com/$OWNER/$REPO"
 echo "  web:   ${URL:-pendiente} (estado: ${ESTADO:-sin configurar})"
 echo "  si el estado no es «built», espera un minuto y recarga."
