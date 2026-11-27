@@ -1957,7 +1957,7 @@ kbd {
       for (let x = 0; x < size; x++) {
         let v = 0, wsum = 0;
         for (let o = 0; o < 2; o++) {
-          const step = Math.max(1, Math.round(cell * (o ? 1 : 2.6)));
+          const step = Math.max(1, Math.round(cell * (o ? 0.7 : 1.8)));
           const xf = x / step, yf = y / step;
           const x0 = Math.floor(xf), y0 = Math.floor(yf);
           const fx = xf - x0, fy = yf - y0;
@@ -2003,7 +2003,10 @@ kbd {
         const i = y * w + x;
         const q = i << 2;
         const y0 = 0.2126 * LIN[d[q]] + 0.7152 * LIN[d[q + 1]] + 0.0722 * LIN[d[q + 2]];
-        const weight = Math.sqrt(y0) * (1 - 0.45 * y0);
+        /* El grano sigue al pigmento: se ve en el azul y no en el blanco del
+           papel. Al revés —que era como estaba— ensuciaba justo las zonas
+           limpias y no tocaba las densas. */
+        const weight = 1 - 0.72 * y0;
         scaleRgb(d, q, 1 + n * amp * weight);
       }
     }
@@ -3879,16 +3882,25 @@ kbd {
     wrap.appendChild(row);
     wrap.appendChild(strength.node);
     wrap.appendChild(note);
-    paintLooks();
+    /* Canvas nuevos: sin esto el bucle de arriba los dejaría en blanco porque
+       la clave de caché no ha cambiado. */
+    looksKey = '';
+    paintLooks(true);
   }
 
   /* Las miniaturas se revelan de verdad, con la foto cargada. Ocho cuestan
      ~30 ms, así que van de una tirada y sólo cuando cambia la foto. */
   let looksKey = '';
-  function paintLooks() {
+  function paintLooks(force) {
     if (!img || !engine) return;
-    if (looksKey === String(imgRev)) return;
-    looksKey = String(imgRev);
+    /* Mientras se arrastra un mando no se repintan las miniaturas: el motor
+       cambia en cada paso y serían 30 ms por fotograma. Se repintan al soltar. */
+    if (fast && !force) return;
+    /* La clave lleva también el motor: si cambia la química o el virado, la
+       miniatura tiene que enseñar ese revelado y no el anterior. */
+    const k = imgRev + ':' + engHash;
+    if (looksKey === k) return;
+    looksKey = k;
     document.querySelectorAll('.looks-grid .look').forEach((btn) => {
       const cv = btn.querySelector('canvas');
       const id = btn.dataset.look;

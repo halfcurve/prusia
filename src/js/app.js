@@ -659,16 +659,25 @@
     wrap.appendChild(row);
     wrap.appendChild(strength.node);
     wrap.appendChild(note);
-    paintLooks();
+    /* Canvas nuevos: sin esto el bucle de arriba los dejaría en blanco porque
+       la clave de caché no ha cambiado. */
+    looksKey = '';
+    paintLooks(true);
   }
 
   /* Las miniaturas se revelan de verdad, con la foto cargada. Ocho cuestan
      ~30 ms, así que van de una tirada y sólo cuando cambia la foto. */
   let looksKey = '';
-  function paintLooks() {
+  function paintLooks(force) {
     if (!img || !engine) return;
-    if (looksKey === String(imgRev)) return;
-    looksKey = String(imgRev);
+    /* Mientras se arrastra un mando no se repintan las miniaturas: el motor
+       cambia en cada paso y serían 30 ms por fotograma. Se repintan al soltar. */
+    if (fast && !force) return;
+    /* La clave lleva también el motor: si cambia la química o el virado, la
+       miniatura tiene que enseñar ese revelado y no el anterior. */
+    const k = imgRev + ':' + engHash;
+    if (looksKey === k) return;
+    looksKey = k;
     document.querySelectorAll('.looks-grid .look').forEach((btn) => {
       const cv = btn.querySelector('canvas');
       const id = btn.dataset.look;

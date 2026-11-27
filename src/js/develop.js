@@ -393,7 +393,7 @@
       for (let x = 0; x < size; x++) {
         let v = 0, wsum = 0;
         for (let o = 0; o < 2; o++) {
-          const step = Math.max(1, Math.round(cell * (o ? 1 : 2.6)));
+          const step = Math.max(1, Math.round(cell * (o ? 0.7 : 1.8)));
           const xf = x / step, yf = y / step;
           const x0 = Math.floor(xf), y0 = Math.floor(yf);
           const fx = xf - x0, fy = yf - y0;
@@ -439,7 +439,10 @@
         const i = y * w + x;
         const q = i << 2;
         const y0 = 0.2126 * LIN[d[q]] + 0.7152 * LIN[d[q + 1]] + 0.0722 * LIN[d[q + 2]];
-        const weight = Math.sqrt(y0) * (1 - 0.45 * y0);
+        /* El grano sigue al pigmento: se ve en el azul y no en el blanco del
+           papel. Al revés —que era como estaba— ensuciaba justo las zonas
+           limpias y no tocaba las densas. */
+        const weight = 1 - 0.72 * y0;
         scaleRgb(d, q, 1 + n * amp * weight);
       }
     }
