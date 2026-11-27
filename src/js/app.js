@@ -43,7 +43,7 @@
   state.calib = null;
   state.dev = D.defaults();
   state.look = { id: 'ninguno', strength: 1 };
-  state.tool = null;
+
   state.zoom = 1;
   state.raw = false;
 
@@ -53,6 +53,7 @@
   let engine = null;
   let pending = false;
   let fast = false;
+  let fastT = 0;
   let engHash = '';
   let imgRev = 0;
 
@@ -127,7 +128,7 @@
       Object.assign(state.dev, D.defaults());
     }
     buildEngine();
-    rebuildSheet();
+    buildPanes();
     drawStage();
     renderReadouts();
     syncHints();
@@ -227,7 +228,7 @@
       texture: state.proc.texture, mix: engine.mix,
       develop: useDev ? state.dev : null,
       devKey: useDev ? devSig + ':' + imgRev : '',
-      quality: fast ? 0.62 : 1,
+      quality: fast ? 0.5 : 1,
       cache: devCache
     });
     $('#stage-meta').textContent =
@@ -269,6 +270,8 @@
       drawStage();
       renderReadouts();
       syncHints();
+      paintHist();
+      paintLooks();
     });
   }
 
@@ -279,6 +282,14 @@
     if (saveT) clearTimeout(saveT);
     saveT = setTimeout(save, 450);
     pushHistory(label, mergeable);
+    /* Arrastrar un deslizador revela a media resolución mientras el gesto
+       dura y pide un fotograma bueno al soltarlo: a pantalla retina el revelado
+       completo cuesta ~200 ms y a resolución plena se notaba como tirones. */
+    if (mergeable) {
+      fast = true;
+      if (fastT) clearTimeout(fastT);
+      fastT = setTimeout(() => { fast = false; schedule(); }, 220);
+    }
     mergeable = false;
     devSig = '';
     schedule();
@@ -315,7 +326,7 @@
       w.appendChild(el('span', { class: 'chip ' + cls, text: text }));
     });
 
-    const alert = $('#sheet-alert');
+    const alert = $('#panes-alert');
     if (alert) {
       alert.textContent = '';
       if (d.capacityShort || d.veiled || d.weak) {
@@ -328,34 +339,25 @@
   }
 
   /* ================================================== bandeja de herramientas */
-  const ICON = {
-    estilos: '<rect x="3.5" y="3.5" width="7.4" height="7.4" rx="1.7"/><rect x="13.1" y="3.5" width="7.4" height="7.4" rx="1.7"/><rect x="3.5" y="13.1" width="7.4" height="7.4" rx="1.7"/><rect x="13.1" y="13.1" width="7.4" height="7.4" rx="1.7"/>',
-    enfoque: '<path d="M4 8.5V5.6A1.6 1.6 0 0 1 5.6 4h2.9"/><path d="M20 8.5V5.6A1.6 1.6 0 0 0 18.4 4h-2.9"/><path d="M4 15.5v2.9A1.6 1.6 0 0 0 5.6 20h2.9"/><path d="M20 15.5v2.9A1.6 1.6 0 0 1 18.4 20h-2.9"/><circle cx="12" cy="12" r="2.2"/>',
-    lente: '<circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="4.1"/><path d="M12 3.6v3.6M12 16.8v3.6M3.6 12h3.6M16.8 12h3.6"/>',
-    efectos: '<path d="M12 3.4l1.9 4.6 4.6 1.9-4.6 1.9L12 16.4l-1.9-4.6L5.5 9.9l4.6-1.9z"/><path d="M18.4 15.2l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/>',
-    ajustes: '<path d="M4 7.5h5.5M14 7.5h6M4 16.5h6M14.5 16.5H20"/><circle cx="11.6" cy="7.5" r="2.1"/><circle cx="12.1" cy="16.5" r="2.1"/>',
-    negativo: '<circle cx="12" cy="12" r="8.4"/><path d="M12 3.6a8.4 8.4 0 0 1 0 16.8z" fill="currentColor" stroke="none"/>',
-    quimica: '<circle cx="12" cy="11" r="4.2"/><path d="M12 2.6v1.8M12 17.6v1.8M3.6 11H5.4M18.6 11h1.8M6.1 5.1l1.3 1.3M16.6 15.6l1.3 1.3M17.9 5.1l-1.3 1.3M7.4 15.6l-1.3 1.3"/>',
-    ver: '<path d="M2.6 12S6 6.2 12 6.2 21.4 12 21.4 12 18 17.8 12 17.8 2.6 12 2.6 12z"/><circle cx="12" cy="12" r="2.6"/>',
-    salida: '<path d="M12 3.6v10.2"/><path d="M8.4 10.4L12 14l3.6-3.6"/><path d="M4.4 16.4v2.2a1.8 1.8 0 0 0 1.8 1.8h11.6a1.8 1.8 0 0 0 1.8-1.8v-2.2"/>',
-    fuentes: '<circle cx="12" cy="12" r="8.4"/><path d="M12 10.8v5.4"/><circle cx="12" cy="7.9" r="0.9" fill="currentColor" stroke="none"/>'
-  };
-
-  const TOOLS = [
-    { id: 'estilos', name: 'Estilos', note: 'Estilos de revelado, medidos sobre tu foto' },
-    { id: 'enfoque', name: 'Enfoque', note: 'Nitidez, estructura y claridad' },
-    { id: 'lente', name: 'Desenfoque', note: 'Profundidad de campo sobre un foco elíptico' },
-    { id: 'efectos', name: 'Efectos', note: 'Grano, viñeta, brillo, contraste tonal, emulsión' },
-    { id: 'ajustes', name: 'Ajustes', note: 'Punto negro y blanco, medios tonos, contraste' },
-    { id: 'negativo', name: 'Negativo', note: 'Soporte, tinta de bloqueo y rango' },
-    { id: 'quimica', name: 'Cianotipia', note: 'Química, exposición, papel y virado' },
-    { id: 'ver', name: 'Ver', note: 'Qué se muestra, zoom y comparación' },
-    { id: 'salida', name: 'Salida', note: 'Tamaño, resolución y exportación' },
-    { id: 'fuentes', name: 'Fuentes', note: 'De dónde sale cada número' }
+  /* -------------------------------------------------- columnas laterales */
+  /* Ya no hay bandeja ni pestañas que abrir y cerrar: a la izquierda va lo que
+     se elige mirando (estilos, densidad, ficha) y a la derecha, en una sola
+     columna que se desplaza, todo lo que se ajusta. Cada bloque se pliega si
+     molesta, pero nada desaparece ni tapa la foto. */
+  const PANES = [
+    { id: 'enfoque', name: 'Enfoque', open: true },
+    { id: 'lente', name: 'Desenfoque', open: true },
+    { id: 'efectos', name: 'Efectos', open: true },
+    { id: 'ajustes', name: 'Ajustes', open: false },
+    { id: 'negativo', name: 'Negativo', open: false },
+    { id: 'quimica', name: 'Cianotipia', open: false },
+    { id: 'salida', name: 'Salida', open: false },
+    { id: 'fuentes', name: 'Fuentes', open: false }
   ];
 
   let sliders = [];      // controles que responden al arrastre
   let armed = null;      // el control armado ahora mismo
+  const paneEls = {};    // id → { pane, body, head, reset }
 
   /* iconos: SVG estático del propio código, creado con el parser del DOM
      (sin innerHTML, y sin datos que vengan de fuera) */
@@ -366,75 +368,194 @@
     return document.importNode(doc.documentElement, true);
   }
 
-  function buildRail() {
-    const rail = $('#tray-rail');
-    rail.textContent = '';
-    TOOLS.forEach((t) => {
-      const b = el('button', {
-        class: 'tool', 'aria-pressed': 'false', dataset: { tool: t.id }, title: t.note
-      }, [
-        el('span', { class: 'tool-ico' }, [svgIcon(ICON[t.id])]),
-        el('span', { class: 'tool-name', text: t.name })
-      ]);
-      b.addEventListener('click', () => openTool(state.tool === t.id ? null : t.id));
-      rail.appendChild(b);
-    });
-  }
-
-  function openTool(id) {
-    state.tool = id;
-    document.querySelectorAll('.tool').forEach((b) => {
-      const on = b.dataset.tool === id;
-      b.classList.toggle('is-active', on);
-      b.setAttribute('aria-pressed', on ? 'true' : 'false');
-    });
-    const sheet = $('#tray-sheet');
-    if (!id) {
-      sheet.hidden = true;
-      armed = null;
-      $('#drag-pill').hidden = true;
-      fitGround();
-      return;
-    }
-    sheet.hidden = false;
-    rebuildSheet();
-  }
-
-  function rebuildSheet() {
-    const id = state.tool;
-    if (!id) return;
-    const t = TOOLS.find((x) => x.id === id);
-    $('#sheet-title').textContent = t.name;
-    $('#sheet-note').textContent = t.note;
-    const body = $('#sheet-body');
-    body.textContent = '';
-    sliders = [];
-    armed = null;
-    const api = {
+  function controlApi(body) {
+    return {
       body: body,
       slider: (o) => regSlider(U.slider(o), o),
-      select: (o) =>
-        U.select(o),
+      select: (o) => U.select(o),
       toggle: (o) => U.toggle(o),
       swatches: (o) => U.swatches(o),
       number: (o) => U.number(o),
       group: (title, kids) => U.group(title, kids),
-      wide: (node) => { node.classList.add('sheet-wide'); return node; }
+      wide: (node) => { node.classList.add('ctl-wide'); return node; }
     };
-    BUILD[id](api);
-    $('#sheet-reset').hidden = id === 'fuentes';
-    if (sliders.length) arm(sliders[0]);
-    else $('#drag-pill').hidden = true;
-    paintDirty();
-    requestAnimationFrame(() => {
-      fitGround();
-      const sh = $('#tray-sheet');
-      sh.classList.toggle('has-overflow', sh.scrollHeight > sh.clientHeight + 2);
-    });
   }
 
-  /* La rejilla del estudio ya recoloca la foto al abrir o cerrar el panel;
-     aquí sólo hay que volver a medir y pintar. */
+  /* Reiniciar un bloque: deja sólo lo suyo como estaba. El botón vive en la
+     cabecera de cada sección, así que ya no hay que abrir nada para llegar. */
+  function resetPane(id) {
+    const d = D.defaults();
+    if (id === 'enfoque') {
+      ['sharp', 'radius', 'threshold', 'structure', 'clarity'].forEach((k) => { state.dev[k] = d[k]; });
+    } else if (id === 'lente') {
+      ['lens', 'lensTrans', 'lensY', 'lensSize', 'lensBokeh'].forEach((k) => { state.dev[k] = d[k]; });
+    } else if (id === 'efectos') {
+      ['grain', 'grainSize', 'textura', 'texturaTipo', 'vignette', 'vignetteMid', 'glow', 'glowWarm',
+        'tonal', 'shadows', 'mids', 'highs'].forEach((k) => { state.dev[k] = d[k]; });
+    } else if (id === 'ajustes') {
+      Object.assign(state.neg, { black: 0, white: 100, gamma: 1, contrast: 0, mix: 'neutro' });
+    } else if (id === 'negativo') {
+      Object.assign(state.neg, { dr: T.CHEM[state.proc.chem].range, autoDr: true });
+    } else if (id === 'quimica') {
+      Object.assign(state.proc, { exposure: 0, toner: 'ninguno', oxidation: 1, texture: 0.35 });
+    } else {
+      return;
+    }
+    if (id === 'enfoque' || id === 'lente' || id === 'efectos') state.look.id = 'personalizado';
+    pushHistory('Reiniciar ' + id);
+    devSig = '';
+    save();
+    buildPanes();
+    buildEngine();
+    drawStage();
+    renderReadouts();
+    syncHints();
+    U.toast('Reiniciado');
+  }
+
+  function buildPanes() {
+    const host = $('#controls');
+    const open = {};
+    document.querySelectorAll('#controls .pane').forEach((n) => {
+      open[n.dataset.pane] = n.classList.contains('is-open');
+    });
+    const scroll = host.scrollTop;
+    host.textContent = '';
+    sliders = [];
+    armed = null;
+    PANES.forEach((def) => {
+      const body = el('div', { class: 'pane-body' });
+      const reset = el('button', {
+        class: 'pane-reset', type: 'button', text: 'Reiniciar',
+        title: 'Dejar este bloque como estaba'
+      });
+      if (def.id === 'fuentes') reset.hidden = true;
+      const head = el('button', { class: 'pane-head', type: 'button', 'aria-expanded': 'false' }, [
+        el('h2', { class: 'pane-title', text: def.name }),
+        el('span', { class: 'pane-dot', 'aria-hidden': 'true' }),
+        reset
+      ]);
+      const pane = el('section', { class: 'pane', dataset: { pane: def.id } }, [head, body]);
+      if (open[def.id] == null ? def.open : open[def.id]) {
+        pane.classList.add('is-open');
+        head.setAttribute('aria-expanded', 'true');
+      }
+      head.addEventListener('click', (e) => {
+        if (e.target === reset) return;
+        const on = !pane.classList.contains('is-open');
+        pane.classList.toggle('is-open', on);
+        head.setAttribute('aria-expanded', on ? 'true' : 'false');
+      });
+      reset.addEventListener('click', (e) => {
+        e.stopPropagation();
+        resetPane(def.id);
+      });
+      host.appendChild(pane);
+      paneEls[def.id] = { pane: pane, body: body, head: head, reset: reset };
+      BUILD[def.id](controlApi(body));
+    });
+    if (sliders.length) arm(sliders[0]);
+    else $('#drag-pill').hidden = true;
+    buildLooks();
+    paintDirty();
+    paintHist();
+    host.scrollTop = scroll;
+  }
+
+  /* Rango del negativo sobre la escala de densidad: lo único que de verdad hay
+     que mirar antes de imprimir es si lo que da la cadena cubre lo que pide la
+     química y si el soporte lo aguanta. Se dibuja como una barra con marcas,
+     no como histograma: el histograma diría cómo se reparte la foto, esto dice
+     si la copia va a salir. */
+  function paintHist() {
+    const cv = $('#hist');
+    if (!cv || !engine) return;
+    const d = engine.diag;
+    const chem = T.CHEM[state.proc.chem];
+    const cw = cv.clientWidth || 240;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.round(cw * dpr);
+    cv.height = Math.round(64 * dpr);
+    const g = cv.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, cw, 64);
+
+    const top = Math.max(2.2, Math.ceil(chem.range * 1.6), Math.ceil(d.dmaxSupport));
+    const pad = 8;
+    const w = cw - pad * 2;
+    const X = (v) => pad + (Math.max(0, Math.min(top, v)) / top) * w;
+    const y0 = 20, hb = 12;
+
+    const muted = getComputedStyle(document.documentElement).getPropertyValue('--muted-2').trim() || '#8a8177';
+
+    // pista
+    g.fillStyle = 'rgba(255,255,255,0.05)';
+    g.fillRect(pad, y0, w, hb);
+
+    // techo del soporte
+    const xs = X(d.dmaxSupport);
+    g.strokeStyle = d.capacityShort ? '#c4563f' : 'rgba(255,255,255,0.22)';
+    g.lineWidth = 1;
+    g.setLineDash([3, 3]);
+    g.beginPath(); g.moveTo(xs, y0 - 6); g.lineTo(xs, y0 + hb + 6); g.stroke();
+    g.setLineDash([]);
+
+    // lo que pide la química
+    const xr = X(chem.range);
+    g.fillStyle = 'rgba(255,255,255,0.10)';
+    g.fillRect(pad, y0 - 3, xr - pad, hb + 6 - 6);
+
+    // lo que da el negativo
+    const a = X(Math.min(d.densMin, d.densMax));
+    const b = X(Math.max(d.densMin, d.densMax));
+    const grad = g.createLinearGradient(a, 0, b, 0);
+    grad.addColorStop(0, '#7fb6dd');
+    grad.addColorStop(1, '#2f6ea8');
+    g.fillStyle = grad;
+    g.fillRect(a, y0, Math.max(2, b - a), hb);
+
+    // marcas cada 0,5 D
+    g.fillStyle = muted;
+    g.font = '500 9px ui-monospace, SFMono-Regular, Menlo, monospace';
+    g.textAlign = 'center';
+    for (let v = 0; v <= top; v += 0.5) {
+      const x = X(v);
+      g.fillStyle = 'rgba(255,255,255,0.16)';
+      g.fillRect(Math.round(x), y0 + hb + 2, 1, 3);
+      g.fillStyle = muted;
+      g.fillText(v.toFixed(1).replace('.', ','), x, y0 + hb + 15);
+    }
+
+    // etiquetas de los dos extremos
+    g.textAlign = 'left';
+    g.fillStyle = '#cfe2ee';
+    g.font = '600 10px ui-monospace, SFMono-Regular, Menlo, monospace';
+    g.fillText(num(d.densMin), a, y0 - 7);
+    g.textAlign = 'right';
+    g.fillText(num(d.densMax), b, y0 - 7);
+
+    const note = $('#hist-note');
+    if (note) {
+      /* una sola línea: el veredicto. Los números están justo debajo, en la
+         ficha, y repetirlos aquí sólo servía para empujarla fuera de pantalla */
+      note.textContent = d.capacityShort ? 'El soporte se queda corto: falta ' + num(d.dr - d.dmaxSupport) + ' D'
+        : d.veiled ? 'Los blancos salen velados: baja el punto negro'
+          : d.weak ? 'Los negros no llegan al azul pleno'
+            : 'Cubre lo que pide la química: ' + num(chem.range) + ' D';
+    }
+  }
+
+  /* El API de pruebas (y cualquier enlace antiguo) sigue funcionando: abrir una
+     herramienta es abrir su bloque y llevarlo a la vista. */
+  function openTool(id) {
+    const rec = paneEls[id];
+    if (!rec) return;
+    rec.pane.classList.add('is-open');
+    rec.head.setAttribute('aria-expanded', 'true');
+    rec.pane.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  /* La rejilla del estudio recoloca la foto sola; aquí sólo hay que repintar. */
   function fitGround() {
     requestAnimationFrame(drawStage);
   }
@@ -466,30 +587,49 @@
     return ctl;
   }
 
+  /* La píldora dice qué mando responde al arrastre sobre la foto. Se enseña al
+     tocar un control y se va sola: dejarla siempre flotando tapaba la esquina
+     del papel y no hacía falta tenerla a la vista. */
+  let pillT = 0;
+  function showPill() {
+    if (!armed) return;
+    const pill = $('#drag-pill');
+    pill.hidden = false;
+    $('#dp-k').textContent = armed.label;
+    $('#dp-v').textContent = armed.fmt(armed.value());
+    if (pillT) clearTimeout(pillT);
+    pillT = setTimeout(() => { $('#drag-pill').hidden = true; pillT = 0; }, 1600);
+  }
+
   function arm(rec) {
     if (!rec) return;
     armed = rec;
     sliders.forEach((s) => s.node.classList.toggle('is-armed', s === rec));
-    const pill = $('#drag-pill');
-    pill.hidden = false;
-    $('#dp-k').textContent = rec.label;
-    $('#dp-v').textContent = rec.fmt(rec.value());
+    showPill();
   }
 
   function paintPill() {
     if (!armed) return;
-    $('#dp-v').textContent = armed.fmt(armed.value());
+    showPill();
   }
 
   /* ----------------------------------------------------------- herramientas */
   const BUILD = {};
 
   /* ---- Estilos ---- */
-  BUILD.estilos = (api) => {
+  /* Estilos: no es una sección de ajustes sino una rejilla de miniaturas en la
+     columna izquierda. Se elige mirando, y la intensidad va justo debajo. */
+  function buildLooks() {
+    const host = $('#looks-host');
+    if (!host) return;
+    host.textContent = '';
+    const api = controlApi(host);
+    const wrap = el('div', { class: 'looks-grid' });
+    host.appendChild(wrap);
     const row = el('div', { class: 'looks', role: 'group', 'aria-label': 'Estilos' });
     const badges = {};
     const strength = api.slider({
-      id: 'lookstr', label: 'Intensidad del estilo',
+      id: 'lookstr', label: 'Intensidad',
       min: 0, max: 1, step: 0.02, value: state.look.strength == null ? 1 : state.look.strength,
       fmt: (v) => Math.round(v * 100) + ' %',
       onInput: (v) => {
@@ -516,25 +656,28 @@
     });
 
     const note = el('p', { class: 'look-note', text: (P.looks.byId[state.look.id] || { note: '' }).note });
-    api.body.appendChild(row);
-    api.body.appendChild(note);
-    api.body.appendChild(api.wide(U.group(null, [strength.node])));
+    wrap.appendChild(row);
+    wrap.appendChild(strength.node);
+    wrap.appendChild(note);
+    paintLooks();
+  }
 
-    /* Miniaturas reales: se revela un recorte con el estilo y la química
-       elegida. Las ocho cuestan unos 30 ms, así que van de una tirada: hacerlo
-       por fotogramas dejaba huecos si la pestaña estaba en segundo plano
-       (requestAnimationFrame no corre ahí) y no ganaba nada. */
-    const src = thumbSource();
-    const eng = engine;
-    if (!src) return;
-    P.looks.LIST.forEach((look) => {
-      const cv = badges[look.id].querySelector('canvas');
-      const th = P.looks.thumb(src, P.looks.paramsFor(look.id, 1), eng, cv.width);
+  /* Las miniaturas se revelan de verdad, con la foto cargada. Ocho cuestan
+     ~30 ms, así que van de una tirada y sólo cuando cambia la foto. */
+  let looksKey = '';
+  function paintLooks() {
+    if (!img || !engine) return;
+    if (looksKey === String(imgRev)) return;
+    looksKey = String(imgRev);
+    document.querySelectorAll('.looks-grid .look').forEach((btn) => {
+      const cv = btn.querySelector('canvas');
+      const id = btn.dataset.look;
+      const th = P.looks.thumb(img, P.looks.paramsFor(id, 1), engine, cv.width);
       const g2 = cv.getContext('2d');
       g2.clearRect(0, 0, cv.width, cv.height);
       g2.drawImage(th, 0, 0, cv.width, cv.height);
     });
-  };
+  }
 
   function thumbSource() {
     return img;
@@ -603,7 +746,7 @@
   BUILD.lente = (api) => {
     api.body.appendChild(api.wide(el('p', { class: 'sheet-lead', text:
       'Un foco elíptico: dentro la foto queda nítida, fuera se abre el desenfoque. Las luces del fondo ganan cuerpo antes de emborronarse, que es lo que hace una lente de verdad y no un simple desenfoque.' })));
-    api.body.appendChild(api.group('Desenfoque', [
+    api.body.appendChild(api.group('Foco', [
       api.slider({
         id: 'lens', label: 'Intensidad', min: 0, max: 100, step: 1, value: state.dev.lens,
         fmt: (v) => (v > 0 ? '+' : '') + Math.round(v),
@@ -689,16 +832,24 @@
         onInput: (v) => { state.dev.vignetteMid = v; customLook(); touch('Viñeta'); }
       }).node
     ]));
-    api.body.appendChild(api.group('Contraste por bandas', [
+    api.body.appendChild(api.group('Contraste', [
       api.slider({
         id: 'tonal', label: 'Contraste tonal', min: -100, max: 100, step: 1, value: state.dev.tonal,
         fmt: (v) => (v > 0 ? '+' : '') + Math.round(v),
-        hint: 'Lo que hace revelar con dos exposiciones y enmascarar, pero por separado.',
+        hint: 'Como revelar con dos exposiciones y enmascarar: sube el contraste sin recortar los extremos.',
         onInput: (v) => { state.dev.tonal = v; customLook(); touch('Contraste tonal'); }
-      }).node,
+      }).node
+    ]));
+
+    /* Luz por zonas, no contraste por zonas: el mando aclara u oscurece esa
+       banda, que es lo que se hace con un cartón en el positivado. Antes se
+       llamaba «contraste por bandas» y con los valores negativos hundía media
+       foto en negro. */
+    api.body.appendChild(api.group('Luz por zonas', [
       api.slider({
         id: 'shadows', label: 'Sombras', min: -100, max: 100, step: 1, value: state.dev.shadows,
         fmt: (v) => (v > 0 ? '+' : '') + Math.round(v),
+        hint: 'Un cartón sobre las zonas oscuras: aclara el detalle enterrado o lo cierra.',
         onInput: (v) => { state.dev.shadows = v; customLook(); touch('Sombras'); }
       }).node,
       api.slider({
@@ -709,9 +860,9 @@
       api.slider({
         id: 'highs', label: 'Luces', min: -100, max: 100, step: 1, value: state.dev.highs,
         fmt: (v) => (v > 0 ? '+' : '') + Math.round(v),
+        hint: 'Las luces del negativo son la tinta que tapa el papel: si bajan, el blanco de la copia se abre.',
         onInput: (v) => { state.dev.highs = v; customLook(); touch('Luces'); }
-      }).node
-    ]));
+      }).node    ]));
   };
 
   const ctrl = {};
@@ -765,7 +916,7 @@
         value: state.neg.support,
         options: Object.keys(E.SUPPORT).map((k) => ({ value: k, label: E.SUPPORT[k].name })),
         hint: E.SUPPORT[state.neg.support].note,
-        onChange: (v) => { state.neg.support = v; touch('Soporte'); rebuildSheet(); }
+        onChange: (v) => { state.neg.support = v; touch('Soporte'); buildPanes(); }
       }).node,
       api.swatches({
         id: 'ink', label: 'Tinta de bloqueo',
@@ -774,7 +925,7 @@
         options: Object.keys(E.INK).map((k) => ({
           value: k, label: E.INK[k].name, css: 'rgb(' + E.INK[k].rgb.join(',') + ')'
         })),
-        onChange: (v) => { state.neg.ink = v; touch('Tinta'); rebuildSheet(); }
+        onChange: (v) => { state.neg.ink = v; touch('Tinta'); buildPanes(); }
       }).node
     ]));
     ctrl.dr = api.slider({
@@ -810,7 +961,7 @@
         state.proc.printDmax = T.CHEM[v].printDmax;
         if (state.neg.autoDr) state.neg.dr = T.CHEM[v].range;
         touch('Química');
-        rebuildSheet();
+        buildPanes();
       }
     });
     ctrl.exposure = api.slider({
@@ -914,7 +1065,7 @@
       onChange: (v) => {
         state.out.size = v;
         if (v !== 'custom') { state.out.w = PAPER_SIZES[v].w; state.out.h = PAPER_SIZES[v].h; }
-        touch('Papel'); rebuildSheet(); syncOut();
+        touch('Papel'); syncOut();
       }
     });
     ctrl.mmW = api.number({
@@ -1069,7 +1220,6 @@
         devSig = '';
         devCache.key = '';
         schedule();
-        if (state.tool === 'estilos') rebuildSheet();
       };
       image.onerror = () => U.toast('No he podido abrir esa imagen');
       image.src = reader.result;
@@ -1531,44 +1681,6 @@
 
     $('#btn-undo').addEventListener('click', undo);
     $('#btn-redo').addEventListener('click', redo);
-    $('#sheet-back').addEventListener('click', () => openTool(null));
-    $('#sheet-reset').addEventListener('click', () => {
-      const id = state.tool;
-      if (!id) return;
-      if (id === 'enfoque' || id === 'lente' || id === 'efectos') {
-        const d = D.defaults();
-        if (id === 'efectos') {
-          ['grain', 'grainSize', 'textura', 'texturaTipo', 'vignette', 'vignetteMid', 'glow', 'glowWarm', 'tonal', 'shadows', 'mids', 'highs'].forEach((k) => { state.dev[k] = d[k]; });
-        } else if (id === 'lente') {
-          ['lens', 'lensTrans', 'lensY', 'lensSize', 'lensBokeh'].forEach((k) => { state.dev[k] = d[k]; });
-        } else {
-          ['sharp', 'radius', 'threshold', 'structure', 'clarity'].forEach((k) => { state.dev[k] = d[k]; });
-        }
-        state.look.id = 'personalizado';
-      } else if (id === 'estilos') {
-        applyLook('ninguno');
-        return;
-      } else if (id === 'ajustes') {
-        Object.assign(state.neg, { black: 0, white: 100, gamma: 1, contrast: 0, mix: 'neutro' });
-      } else if (id === 'negativo') {
-        Object.assign(state.neg, { dr: T.CHEM[state.proc.chem].range, autoDr: true });
-      } else if (id === 'quimica') {
-        Object.assign(state.proc, { exposure: 0, toner: 'ninguno', oxidation: 1, texture: 0.35 });
-      } else if (id === 'ver') {
-        state.zoom = 1;
-        state.raw = false;
-      }
-      pushHistory('Reiniciar ' + id);
-      devSig = '';
-      save();
-      rebuildSheet();
-      buildEngine();
-      drawStage();
-      renderReadouts();
-      syncHints();
-      U.toast('Reiniciado');
-    });
-
     const stackBtn = $('#btn-stack');
     const stackPanel = $('#stackpanel');
     stackBtn.addEventListener('click', () => {
@@ -1672,7 +1784,14 @@
       if (meta && e.key.toLowerCase() === 'p') { e.preventDefault(); doPrint(); return; }
       if (e.key === 'Escape') {
         if (!$('#stackpanel').hidden) { $('#stackpanel').hidden = true; return; }
-        if (state.tool) { openTool(null); return; }
+        const abiertas = document.querySelectorAll('#controls .pane.is-open');
+        if (abiertas.length) {
+          abiertas.forEach((n) => {
+            n.classList.remove('is-open');
+            n.querySelector('.pane-head').setAttribute('aria-expanded', 'false');
+          });
+          return;
+        }
       }
       if (e.key === '1') setView('revelar');
       else if (e.key === '2') setView('calibrar');
@@ -1810,7 +1929,7 @@
   /* ------------------------------------------------------------------ init */
   function init() {
     restore();
-    buildRail();
+    buildPanes();
     bind();
     buildEngine(true);
     syncOut();

@@ -84,28 +84,35 @@
 
         <div class="stackpanel" id="stackpanel" hidden></div>
 
-        <div class="stage-foot">
-          <div class="readouts" id="readouts"></div>
-          <div class="warnings" id="warnings" role="status" aria-live="polite"></div>
-        </div>
       </div>
 
-      <div class="tray" id="tray">
-        <div class="tray-rail" id="tray-rail" role="toolbar" aria-label="Herramientas"></div>
-      </div>
+      <aside class="side side-left" aria-label="Estilos y ficha del negativo">
+        <section class="pane pane-open">
+          <div class="pane-head"><h2 class="pane-title">Estilos</h2></div>
+          <div class="pane-body" id="looks-host"></div>
+        </section>
 
-      <div class="tray-sheet" id="tray-sheet" hidden>
-          <div class="sheet-head">
-            <button class="sheet-back" id="sheet-back" aria-label="Volver a herramientas">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 6l-6 6 6 6"/></svg>
-            </button>
-            <h2 class="sheet-title" id="sheet-title">Enfoque</h2>
-            <p class="sheet-note" id="sheet-note"></p>
-            <div class="sheet-alert" id="sheet-alert" hidden></div>
-            <button class="sheet-reset" id="sheet-reset">Reiniciar</button>
+        <section class="pane pane-open">
+          <div class="pane-head"><h2 class="pane-title">Densidad del negativo</h2></div>
+          <div class="pane-body">
+            <canvas id="hist" class="hist" width="480" height="120" aria-label="Rango de densidad del negativo"></canvas>
+            <p class="hist-note" id="hist-note"></p>
           </div>
-          <div class="sheet-body" id="sheet-body"></div>
-        </div>
+        </section>
+
+        <section class="pane pane-open">
+          <div class="pane-head"><h2 class="pane-title">Ficha</h2></div>
+          <div class="pane-body">
+            <dl class="readouts" id="readouts"></dl>
+          </div>
+        </section>
+
+        <div class="warnings" id="warnings" role="status" aria-live="polite"></div>
+      </aside>
+
+      <aside class="side side-right" aria-label="Ajustes">
+        <div class="side-scroll" id="controls"></div>
+      </aside>
 
     </div>
   </section>

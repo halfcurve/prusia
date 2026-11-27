@@ -19,19 +19,24 @@ o directamente `docs/index.html` (es un archivo único, sin red, sin dependencia
 
 ## Qué hace
 
-**Revelar** es un estudio con la copia en medio y una bandeja de herramientas abajo.
-Abrir una herramienta abre su panel; en escritorio entra por la derecha y la foto no se
-tapa, en el móvil se mete debajo. El último control tocado queda armado y responde al
-**arrastre sobre la foto** (⇧ para ir fino), como en Snapseed. Todo entra en un historial:
-⌘Z / ⇧⌘Z, y la pestaña de historial salta a cualquier estado anterior.
+**Revelar** es un estudio de tres columnas: a la izquierda lo que se elige mirando
+(los ocho estilos con miniatura real, el rango de densidad del negativo y la ficha con
+Dmáx, Dmín, rango y tinta); en medio la copia, grande; a la derecha, en una sola columna
+que se desplaza, todo lo que se ajusta, sin pestañas que abrir y cerrar. El último control
+tocado queda armado y responde al **arrastre sobre la foto** (⇧ para ir fino), como en
+Snapseed. Todo entra en un historial: ⌘Z / ⇧⌘Z, y la pestaña de historial salta a
+cualquier estado anterior. En pantalla estrecha las tres columnas se apilan en el orden
+en que se trabaja: foto, estilos, ficha, ajustes.
 
 - **Estilos**: ocho revelados (botánica, retrato, arquitectura, antiguo, platino…) con
   miniatura real — se revela de verdad un recorte con tu química, no un filtro de color.
 - **Enfoque**: nitidez, estructura y claridad en luz lineal, con umbral contra el grano y
-  radio en fracción de imagen (el PNG sale igual que el preview).
+  radio en fracción de imagen (el PNG sale igual que el preview; con un suelo de un
+  píxel, porque por debajo la gaussiana es una delta y el mando no hacía nada).
 - **Desenfoque**: foco elíptico movible, transición y cuerpo de las luces.
-- **Efectos**: grano, viñeta, brillo difuso, contraste por bandas e irregularidad de
-  emulsión. Todo se imprime: está dentro del negativo.
+- **Efectos**: grano, viñeta, brillo difuso, contraste y luz por zonas (sombras, medios y
+  luces, que aclaran u oscurecen esa banda como un cartón en el positivado) e
+  irregularidad de emulsión. Todo se imprime: está dentro del negativo.
 - **Ajustes**: punto negro y blanco, medios tonos, contraste y mezcla a gris.
 - **Negativo**: soporte (film OHP / papel / vellum), tinta de bloqueo y rango en log D con
   seguimiento automático de la química.
